@@ -3,7 +3,7 @@ Contributors: grobator
 Tags: favicons, links, icons, blogroll, bookmarks
 Requires at least: 2.7
 Tested up to: 2.8
-Stable tag: 0.2
+Stable tag: 0.3
 
 Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers (f.e. IE).
 
@@ -35,6 +35,9 @@ The plugin fallback on a default favicon, if on the remote websites cannot be de
 
 
 == Changelog ==
+
+= 0.3 =
+* internal "fight" with subversion. No code changes.
 
 = 0.2 =
 * added screenshots
