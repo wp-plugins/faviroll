@@ -1,0 +1,45 @@
+=== FAVIROLL - FAVIcons in blogROLL ===
+Contributors: grobator
+Tags: favicons, links, icons, blogroll, bookmarks
+Requires at least: 2.7
+Tested up to: 2.8
+Stable tag: 0.2
+
+Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers (f.e. IE).
+
+== Description ==
+
+The plugin converts the favicon.ico from the blogroll links in PNG Image format and save the converted image locally. The conversion process works just on the admin-page, visitors don't have to waste time to wait for favicons from remote websites. If a blogroll entry was added or modified this single Link will be updated.
+
+In a configured interval of dates will the favicon cache be refreshed, because the favicons from the remote site can be changed.
+
+The plugin fallback on a default favicon, if on the remote websites cannot be detected a valid favicon. The default icon can be configured.
+
+
+== Screenshots ==
+1. Faviroll's outcome
+2. Faviroll configuration panel
+3. (re)build the local cache with the remote favicons
+
+== Installation ==
+
+1. Upload the folder faviroll to the /wp-content/plugins/ directory.
+1. Activate the plugin through the 'Plugins' menu in WordPress.
+1. Initialize plugin with its settings in general options by clicking the 'Submit' button.
+1. The locally favicon cache will be created.
+1. Thats all, enjoy.
+
+
+== Known issues ==
+* Quality loss (or wrong color transformation) at the conversion from ICO->PNG, but some browsers (f.e. Safari) has a render problem with some native ICO images, too. I'll keep it in sight.
+
+
+== Changelog ==
+
+= 0.2 =
+* added screenshots
+* switching the transparency automatically rebuild the icon cache 
+* increase execution time to max. 5 minutes at (re)building all icons to avoid **Fatal error: Maximum execution time of xxx seconds exceeded**
+
+= 0.1 =
+* Initial version
