@@ -1,10 +1,10 @@
 <?php
 /*
-Plugin Name: FAVIcons in blogROLL
+Plugin Name: FAVIcons for blogROLL
 Plugin URI: http://www.grobator.de/wordpress-stuff/plugins/faviroll
 Description: Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers/operating systems. Don't forget the [<a href="options-general.php?page=faviroll.php">Settings</a>]
 Author: grobator
-Version: 0.3.1
+Version: 0.3.2
 Author URI:  http://www.grobator.de/
 */
 
@@ -504,7 +504,7 @@ function faviroll_options(){
 
 	echo '
 			<div class="wrap">
-				<h2>'.__('FAVIcons in blogROLL', 'faviroll').'</h2>'.$msg.'
+				<h2>'.__('FAVIcons for blogROLL', 'faviroll').'</h2>'.$msg.'
 				<form id="faviroll" name="faviroll" method="post">
 				<table class="form-table">
 				<tr>
