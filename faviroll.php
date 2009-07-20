@@ -74,13 +74,11 @@ class Faviroll {
 		}
 
 		$cachedir = $dir['path'].'/faviroll_cache';
-		if (!is_dir($cachedir)) {
+		if (!is_dir($cachedir))
 			@mkdir($cachedir);
-		}
 
-		if (!is_dir($cachedir)) {
+		if (!is_dir($cachedir))
 			return false;
-		}
 
 		$this->cachedir = $cachedir;
 		$this->cacheurl = $dir['url'].'/faviroll_cache';
