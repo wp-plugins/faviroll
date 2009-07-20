@@ -4,7 +4,7 @@ Plugin Name: FAVIcons for blogROLL
 Plugin URI: http://www.grobator.de/wordpress-stuff/plugins/faviroll
 Description: Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers/operating systems. Don't forget the [<a href="options-general.php?page=faviroll.php">Settings</a>]
 Author: grobator
-Version: 0.3.2
+Version: 0.4
 Author URI:  http://www.grobator.de/
 */
 
@@ -38,9 +38,6 @@ class Faviroll {
 		$this->plugindir = dirname(__FILE__);
 		$this->pluginurl = WP_CONTENT_URL.'/plugins/'.plugin_basename($this->plugindir);
 
-		$this->cachedir = $this->plugindir.'/cache';
-		$this->cacheurl = $this->pluginurl.'/cache';
-
 		$this->defaulticon = get_option('faviroll_default_favicon');
 
 		// initialize with useful default.
@@ -68,8 +65,16 @@ class Faviroll {
 		if (empty($revisit))
 			update_option('faviroll_revisit', 14);
 
-		if ($init && !file_exists($this->cachedir))
-			mkdir($this->cachedir);
+
+		// Plugin was born in July 2009
+		$dir = wp_upload_dir('2009/07');
+		if ($dir['error']) {
+			echo $dir['error'];
+			return false;
+		}
+
+		$this->cachedir = $dir['path'];
+		$this->cacheurl = $dir['url'];
 	}
 
 
@@ -151,10 +156,8 @@ class Faviroll {
 		}
 
 		// Create empty file if cache icon file are not exists
-		if (!is_file($icopath)) {
+		if (!is_file($icopath))
 			fclose(fopen($icopath,'w'));
-		}
-
 
 		$result = (is_file($icopath) && (filesize($icopath) > 0));
 

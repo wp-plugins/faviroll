@@ -3,7 +3,7 @@ Contributors: grobator
 Tags: favicons, links, icons, blogroll, bookmarks
 Requires at least: 2.7
 Tested up to: 2.8
-Stable tag: 0.3.2
+Stable tag: 0.4
 
 Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers (f.e. IE).
 
@@ -35,6 +35,12 @@ The plugin fallback on a default favicon, if on the remote websites cannot be de
 
 
 == Changelog ==
+
+= 0.4 =
+* FIX: unable to create cache directory
+Some user feeback reports the plugin is unable to create cache directory which anchors in plugin folder because of missing write permissions..
+Now I use wordpress core function `wp_upload_dir()` to create the (persistent) cache into the "uploads" note.
+Hopefully now it works all over.
 
 = 0.3.2 =
 * same like version 0.3
