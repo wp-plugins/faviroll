@@ -4,9 +4,11 @@ Plugin Name: FAVIcons for blogROLL
 Plugin URI: http://www.grobator.de/wordpress-stuff/plugins/faviroll
 Description: Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers/operating systems. Don't forget the [<a href="options-general.php?page=faviroll.php">Settings</a>]
 Author: grobator
-Version: 0.4.3
+Version:  [[ **BETA** ]]
 Author URI:  http://www.grobator.de/
 */
+
+error_reporting(E_ALL);
 
 class Faviroll {
 
@@ -37,6 +39,8 @@ class Faviroll {
 
 		$this->plugindir = dirname(__FILE__);
 		$this->pluginurl = WP_CONTENT_URL.'/plugins/'.plugin_basename($this->plugindir);
+		$this->cachedir = $this->plugindir.'/cache';
+		$this->cacheurl = $this->pluginurl.'/cache';
 
 		$this->defaulticon = get_option('faviroll_default_favicon');
 
@@ -56,33 +60,46 @@ class Faviroll {
 
 		// default is enabled background tranparency.
 		$trans = get_option('faviroll_transparency');
-		if (empty($trans)) {
+		if (empty($trans))
 			$init && update_option('faviroll_transparency','on');
-		}
 
 		// initialize with useful default.
-		$revisit = get_option(faviroll_revisit);
+		$revisit = get_option('faviroll_revisit');
 		if (empty($revisit))
 			update_option('faviroll_revisit', 14);
 
+		$this->gc();
 
-		// Plugin was born in July 2009
+	}
+
+
+
+	/**
+	 * Garbage collector
+	 */
+	function gc() {
+
+		// Veraltetes cache Verzeichnis abräumen
+		// Cache dir until version 0.4.2
+		//
 		$dir = wp_upload_dir('2009/07');
-		if ($dir['error']) {
-			echo $dir['error'];
-			return false;
+		if (!isset($dir['path']))
+			return true;
+		
+		$favidir = $dir['path'].'/faviroll_cache';
+		if (!is_dir($favidir))
+			return true;
+
+		// MD5 Strings are always 32 characters
+		foreach(@glob($favidir.'/????????????????????????????????') as $item) {
+			if (is_file($item))
+				@unlink($item);
 		}
 
-		$cachedir = $dir['path'].'/faviroll_cache';
-		if (!is_dir($cachedir))
-			@mkdir($cachedir);
-
-		if (!is_dir($cachedir))
-			return false;
-
-		$this->cachedir = $cachedir;
-		$this->cacheurl = $dir['url'].'/faviroll_cache';
+		@rmdir($favidir);
 	}
+
+
 
 
 	/**
@@ -119,8 +136,10 @@ class Faviroll {
 			ob_flush();
 		}
 
-		$icourl = $this->locateIcon($rooturl);
+echo "+++".$icopath."+++<br />";
+ob_flush();
 
+		$icourl = $this->locateIcon($rooturl);
 		$image = null;
 
 		$ico = new Ico($icourl,$this->transparency);
@@ -193,9 +212,8 @@ class Faviroll {
 
 	/**
 	 * Delete all files from cache
-	 * @return TRUE if cache directoy will be empty on the end
 	 */
-	function flush($withCacheDir=false) {
+	function flush() {
 
 		$this->lastcheck = 0;
 		update_option('faviroll_lastcheck',$this->lastcheck);
@@ -205,22 +223,14 @@ class Faviroll {
 
 		if (!$this->cacheIconsCount())
 			return true;
-			
 
-		// Be sure, that cache dir name is  faviroll_cache
-		if (basename($this->cachedir) != 'faviroll_cache')
-			return false;
-
-		foreach(@glob($this->cachedir.'/*') as $item) {
-			if (is_file($item)) {
-				unlink($item);
-			}
+		// MD5 Strings are always 32 characters
+		foreach(@glob($this->cachedir.'/????????????????????????????????') as $item) {
+			if (is_file($item))
+				@unlink($item);
 		}
 
-		if ($withCacheDir)
-			@rmdir($this->cachedir);
-
-		return (!is_dir($this->cachedir) or (@glob($this->cachedir.'/*') === false));
+		return (!is_dir($this->cachedir) or (@glob($this->cachedir.'/????????????????????????????????') === false));
 	}
 
 
@@ -229,12 +239,21 @@ class Faviroll {
 	 */
 	function cacheIconsCount() {
 
-		$result = (is_dir($this->cachedir)) ? @glob($this->cachedir.'/*') : false;
+		$result = (is_dir($this->cachedir)) ? @glob($this->cachedir.'/????????????????????????????????') : false;
 
 		if ($result === false)
 			$result = array();
 
-		return count($result);
+		$iconFiles = array();
+		foreach($result as $item) {
+			if (!preg_match('/^[A-z,0-9]+$/i',$item))
+				continue;
+			if (!is_file($item))
+				continue;
+			$iconFiles[] = $item;			
+		}
+
+		return count($iconFiles);
 	}
 
 	/**
@@ -379,14 +398,11 @@ This may be take some time... stay tuned, please!</b><br />';
 			$documentpath = "/";
 		}
 
-		if ( !empty( $url_parts["query"] ) )
-			$documentpath .= "?" . $url_parts["query"];
+		if ( !empty( $url_parts['query'] ) )
+			$documentpath .= '?' . $url_parts['query'];
 
-		$host = $url_parts["host"];
-		$port = $url_parts["port"];
-
-		if ( empty($port) )
-			$port = 80;
+		$host = $url_parts['host'];
+		$port = isset($url_parts['port']) ? $url_parts['port'] : 80;
 
 		$socket = @fsockopen( $host, $port, $errno, $errstr, 30 );
 
@@ -466,16 +482,15 @@ add_action('add_link' , 'faviroll_single_favicon');
  */
 function faviroll_options(){
 
-	$nonce = $_REQUEST['_wpnonce'];
-
 	// Initialize plugin options if not remove settings is requested
 	$faviroll = new Faviroll(!isset($_REQUEST['faviroll_remove_settings']));
 
+	$nonce = isset($_REQUEST['_wpnonce']) ? $_REQUEST['_wpnonce'] : null;
 	if (wp_verify_nonce($nonce, 'my-nonce') ) {
 
 		if(isset($_REQUEST['faviroll_remove_settings'])) {
 
-			$faviroll->flush(true);
+			$faviroll->flush();
 
 			delete_option('faviroll_default_favicon');
 			delete_option('faviroll_revisit');
@@ -498,6 +513,7 @@ function faviroll_options(){
 		}
 	}
 
+	$msg = null;
 	$nonce = wp_create_nonce('my-nonce');
 	$default_favicon = get_option('faviroll_default_favicon');
 	$revisit = (int) get_option('faviroll_revisit');
