@@ -21,8 +21,6 @@
  * @method private AllocateColor(&$im, $red, $green, $blue, $alpha = 0)
  **/
 
-error_reporting(E_ALL);
-
 class Ico {
 	/**
 	 * Ico::bgcolor

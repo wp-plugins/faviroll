@@ -2,13 +2,14 @@
 /*
 Plugin Name: FAVIcons for blogROLL
 Plugin URI: http://www.grobator.de/wordpress-stuff/plugins/faviroll
-Description: Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers/operating systems. Don't forget the [<a href="options-general.php?page=faviroll.php">Settings</a>]
+Description: Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers/operating systems. <strong><a href="options-general.php?page=faviroll.php">Settings &raquo; Faviroll</a></strong>
 Author: grobator
 Version:  [[ **BETA** ]]
 Author URI:  http://www.grobator.de/
 */
 
-error_reporting(E_ALL);
+// Debug only on localhost 
+if ($_SERVER['HTTP_HOST'] == 'localhost') error_reporting(E_ALL);
 
 class Faviroll {
 
@@ -100,6 +101,31 @@ class Faviroll {
 	}
 
 
+
+	/**
+	 * from http://de3.php.net/is_writable
+	 * Since looks like the Windows ACLs bug "wont fix" (see http://bugs.php.net/bug.php?id=27609) I propose this alternative function:
+	 */
+	function is__writable($path) {
+
+		if ($path{strlen($path)-1}=='/')
+			return $this->is__writable($path.uniqid(mt_rand()).'.tmp');
+
+		if (file_exists($path)) {
+			if (!($f = @fopen($path, 'r+')))
+				return false;
+			fclose($f);
+			return true;
+		}
+
+		if (!($f = @fopen($path, 'w')))
+			return false;
+
+		fclose($f);
+		unlink($path);
+
+		return true;
+	}
 
 
 	/**
@@ -210,6 +236,7 @@ ob_flush();
 		$this->revisit();
 	}
 
+
 	/**
 	 * Delete all files from cache
 	 */
@@ -218,19 +245,28 @@ ob_flush();
 		$this->lastcheck = 0;
 		update_option('faviroll_lastcheck',$this->lastcheck);
 
-		if (!is_dir($this->cachedir))
-			return true;
-
-		if (!$this->cacheIconsCount())
-			return true;
-
-		// MD5 Strings are always 32 characters
-		foreach(@glob($this->cachedir.'/????????????????????????????????') as $item) {
+		foreach($this->getCacheIcons() as $item) {
 			if (is_file($item))
 				@unlink($item);
 		}
 
-		return (!is_dir($this->cachedir) or (@glob($this->cachedir.'/????????????????????????????????') === false));
+		return ($this->getCacheIconsCount() == 0);
+	}
+
+
+	/**
+	 * @return Reference on Array-List with all favicon file basenames from cache.
+	 */
+	function &getCacheIcons() {
+
+		$result = array();
+		                               // MD5 Strings are always 32 characters
+		foreach(@glob($this->cachedir.'/????????????????????????????????') as $item) {
+			if (is_file($item) && filesize($item))
+				$result[] = basename($item);
+		}
+
+		return $result;
 	}
 
 
@@ -238,23 +274,10 @@ ob_flush();
 	 * @return The count of icons in cache directory.
 	 */
 	function cacheIconsCount() {
-
-		$result = (is_dir($this->cachedir)) ? @glob($this->cachedir.'/????????????????????????????????') : false;
-
-		if ($result === false)
-			$result = array();
-
-		$iconFiles = array();
-		foreach($result as $item) {
-			if (!preg_match('/^[A-z,0-9]+$/i',$item))
-				continue;
-			if (!is_file($item))
-				continue;
-			$iconFiles[] = $item;			
-		}
-
-		return count($iconFiles);
+		$result = $this->getCacheIcons();
+		return count($result);
 	}
+
 
 	/**
 	 * Check revisit date and refresh cached favicons if timeout is occured.
@@ -304,38 +327,73 @@ This may be take some time... stay tuned, please!</b><br />';
 	 */
 	function apply($content) {
 
+		$relPath = $this->getRelativePath();
+
+		// get default icon from database
 		$default_favicon = get_option('faviroll_default_favicon');
 
-		$cacheIcons = array();
-		foreach(@glob($this->cachedir.'/*') as $item) {
-			if (is_file($item) && filesize($item)) {
-				$cacheIcons[] = basename($item);
-			}
-		}
+		// get cached icon list
+		$cacheIcons = $this->getCacheIcons();
 
-		$bookmark_arr = explode("\n",$content);
+		// split bookmarks in lines
+		$lines = explode("\n",$content);
 
-		foreach($bookmark_arr as $k => $v) {
+		$newContent = array();
 
-			if (!(preg_match('/href="(.*)"/', $v, $matches) && !preg_match('/img/', $v))) {
+		// analyze bookmark lines
+		foreach($lines as $line) {
+
+			$line = trim($line);
+
+			if (!(preg_match('/href="(.*)"/', $line, $matches) && !preg_match('/img/', $line))) {
+				// overhead stuff
+				$newContent[] = $line;
 				continue;
 			}
+
 			preg_match('/http:\/\/[a-zA-Z0-9-\.]+(\/|\s|$|\")/', $matches[1],$urls);
 
 			$rooturl = str_replace('"', "", $urls[0]);
 			$rooturl = trim(rtrim($rooturl,'/')).'/';
 
 			$fullurl = trim($matches[1]);
+
+			// md5 cecksum of root-URL is name of favicon cache file
 			$favicon = md5(strtolower($rooturl));
-			$favicon = (in_array($favicon,$cacheIcons)) ? $this->cacheurl."/$favicon" : $default_favicon;
 
-			$str = split('<li><a', $v);
+			// set favicon from cache or fallback to default
+			$favicon = (in_array($favicon,$cacheIcons)) ? "$relPath/$favicon" : $default_favicon;
 
-			$bookmark_arr[$k] = '<li><a style="padding-left:18px; background:url('.$favicon.') 0px center no-repeat;" class="faviroll"'.$str[1];
+			$token = preg_split('#(<li |<a )#',$line);
+			if (count($token) == 3)
+				$line = '<li '.$token[1].'<a style="padding-left:18px; background:url('.$favicon.') 0px center no-repeat;" class="faviroll"'.$token[2];
+
+
+			$newContent[] = $line;
 		}
 
-		return implode("\n",$bookmark_arr);
+echo "<pre>";
+print_r($_SERVER);
+
+echo "<h1>".dirname($_SERVER['PHP_SELF'])."</h1>";
+
+
+		return "<!-- Begin:FaviRoll Plugin -->\n".implode("\n",$newContent)."\n<!-- End:FaviRoll Plugin -->";
 	}
+
+
+	/**
+	 * @return relative path to favicon cache
+	 */
+	function getRelativeCachePath() {
+
+		$this->cacheurl();
+
+echo "<h1>".dirname($_SERVER['PHP_SELF'])."</h1>";
+
+
+	}
+
 
 
 	/**
@@ -589,14 +647,7 @@ function faviroll_options(){
  * Register Faviroll menu in general options menu
  */
 function faviroll_menu() {
-	add_submenu_page(
-		'options-general.php',
-		__('Faviroll', 'faviroll')
-		, __('Faviroll', 'faviroll')
-		, 8
-		, basename(__FILE__)
-		, 'faviroll_options'
-	);
+	add_submenu_page('options-general.php', __('Faviroll', 'faviroll'), __('Faviroll', 'faviroll'), 8, basename(__FILE__), 'faviroll_options');
 }
 add_action('admin_menu', 'faviroll_menu');
 
