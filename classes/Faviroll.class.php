@@ -21,7 +21,7 @@ Version: latest
 
 *************************************************/
 
-require_once('Utils.php');
+require_once('Filetools.php');
 
 class Faviroll {
 
@@ -50,10 +50,12 @@ class Faviroll {
 	 */
 	function __construct($init=true) {
 
-		$this->plugindir = dirname(__FILE__);
-		$this->pluginurl = WP_CONTENT_URL.'/plugins/'.plugin_basename($this->plugindir);
+		$basedir = plugin_basename(dirname(dirname(__FILE__)));
+
+		$this->plugindir = WP_PLUGIN_DIR."/$basedir";
+		$this->pluginurl = WP_PLUGIN_URL."/$basedir";
 		$this->cachedir = $this->plugindir.'/cache';
-		$this->cacheurl = $this->pluginurl.'/cache';
+		$this->cacheurl = $this->getRelativeURL();
 
 		$this->defaulticon = get_option('faviroll_default_favicon');
 
@@ -370,12 +372,27 @@ echo "<h1>".dirname($_SERVER['PHP_SELF'])."</h1>";
 	/**
 	 * @return relative path to favicon cache
 	 */
-	function getRelativeCachePath() {
+	function getRelativeURL() {
 
-		$this->cacheurl();
+		$result = false;
 
-echo "<h1>".dirname($_SERVER['PHP_SELF'])."</h1>";
+		$elems = parse_url($this->pluginurl);
 
+		if (!isset($elems['path']))
+			return $result;
+
+
+		$myURL = dirname($_SERVER['PHP_SELF']);
+
+		$cacheURL = trim(rtrim($elems['path'],'/')).'/cache';
+
+
+		if (strstr($cacheURL,$myURL))
+			$result = str_replace($myURL,'.',$cacheURL);
+
+echo "<h1>$result</h1>";
+
+			return $result;
 
 	}
 

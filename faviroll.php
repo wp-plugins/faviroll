@@ -12,7 +12,7 @@ Author URI:  http://www.grobator.de/
 if ($_SERVER['HTTP_HOST'] == 'localhost') error_reporting(E_ALL);
 
 
-require_once('classes/Faviroll.php');
+require_once('Faviroll.class.php');
 
 // - - - - - - - - - - - - - - [Wordpress plugin stuff] - - - - - - - - - - - - - - - - - - - -
 
