@@ -1,20 +1,34 @@
 <?php
 /*
-Plugin Name: FAVIcons for blogROLL
+Plugin Name: FAVIROLL - FAVIcons for blogROLL
 Plugin URI: http://www.grobator.de/wordpress-stuff/plugins/faviroll
 Description: Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers/operating systems. <strong><a href="options-general.php?page=faviroll.php">Settings &raquo; Faviroll</a></strong>
 Author: grobator
 Version:  [[ **BETA** ]]
 Author URI:  http://www.grobator.de/
+----------------------------------------------------------------------------------------
+Copyright 2009 grobator  (email: http://www.grobator.de/kontakt)
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 // Debug only on localhost 
 if ($_SERVER['HTTP_HOST'] == 'localhost') error_reporting(E_ALL);
 
-
 require_once('Faviroll.class.php');
 
-// - - - - - - - - - - - - - - [Wordpress plugin stuff] - - - - - - - - - - - - - - - - - - - -
 
 /**
  * Main function
@@ -24,9 +38,7 @@ function faviroll_list_bookmarks($output) {
 	$faviroll = new Faviroll();
 	return $faviroll->apply($output);
 }
-// Add Filter
 add_filter('wp_list_bookmarks', 'faviroll_list_bookmarks');
-
 
 
 /**
@@ -40,9 +52,8 @@ function faviroll_revisit() {
 	$faviroll = new Faviroll();
 	return $faviroll->revisit();
 }
-
-// Add Action
 add_action('admin_notices', 'faviroll_revisit');
+
 
 /**
  * Compute a favicon of a single bookmark
@@ -56,35 +67,30 @@ function faviroll_single_favicon($link_id) {
 	$faviroll = new Faviroll();
 	$faviroll->putIconIntoCache(get_link($link_id));
 }
-
-// Add Action
 add_action('edit_link', 'faviroll_single_favicon');
 add_action('add_link' , 'faviroll_single_favicon');
 
-
-// ------------------------------------------------------------------------------------
 
 /**
  * Add option page
  */
 function faviroll_options(){
 
+	$message = null;
+	$removeSettings = isset($_REQUEST['faviroll_remove_settings']);
+
 	// Initialize plugin options if not remove settings is requested
-	$faviroll = new Faviroll(!isset($_REQUEST['faviroll_remove_settings']));
+	$faviroll = new Faviroll(!$removeSettings);
 
 	$nonce = isset($_REQUEST['_wpnonce']) ? $_REQUEST['_wpnonce'] : null;
 	if (wp_verify_nonce($nonce, 'my-nonce') ) {
 
-		if(isset($_REQUEST['faviroll_remove_settings'])) {
+		if($removeSettings) {
 
-			$faviroll->flush();
+			$faviroll->flush(true);
+			$faviroll->removeSettings();
 
-			delete_option('faviroll_default_favicon');
-			delete_option('faviroll_revisit');
-			delete_option('faviroll_transparency');
-			delete_option('faviroll_lastcheck');
-
-			$msg = 'Plugin settings and cached icons removed.<br /><a href="./plugins.php?plugin_status=active">Switch to the active plugins</a>';
+			$message = 'Plugin settings and cached icons removed.<br /><a href="./plugins.php?plugin_status=active">Now you can deactivate the plugin</a>';
 
 		} else {
 
@@ -96,37 +102,41 @@ function faviroll_options(){
 			update_option('faviroll_revisit'     , (int) trim($_REQUEST['faviroll_revisit']));
 			update_option('faviroll_transparency', (isset($_REQUEST['faviroll_transparency']) ? 'on' : 'off') );
 
-			$msg = 'Settings updated';
+			$message = 'Settings updated';
 		}
 	}
 
-	$msg = null;
+	// create nonce
 	$nonce = wp_create_nonce('my-nonce');
+
 	$default_favicon = get_option('faviroll_default_favicon');
-	$revisit = (int) get_option('faviroll_revisit');
+	$revisit = ($removeSettings) ? null : (int) get_option('faviroll_revisit');
+
 	$is_transparency = (get_option('faviroll_transparency') == 'on');
 
 
-	if (isset($was_transparency) && ($is_transparency != $was_transparency)) {
-		$msg = 'Transparency switched';
-		$_REQUEST['faviroll_renew_icons'] = 'true';
+	if (!$removeSettings) {
+
+		if (isset($was_transparency) && ($is_transparency != $was_transparency)) {
+			$message = 'Transparency switched';
+			$_REQUEST['faviroll_renew_icons'] = 'true';
+		}
+		if(isset($_REQUEST['faviroll_renew_icons']))
+			$faviroll->reset();
+
 	}
 
-	if(isset($_REQUEST['faviroll_renew_icons']))
-		$faviroll->reset();
 
-	if (isset($msg))
-		$msg = '<div class="updated fade below-h2" id="message"><p>'.$msg.'</p></div>';
+	if (!is_null($message))
+		$message = '<div class="updated fade below-h2" id="message"><p>'.$message.'</p></div>';
 
 	echo '
 			<div class="wrap">
-				<h2>'.__('FAVIcons for blogROLL', 'faviroll').'</h2>'.$msg.'
+				<h2>'.__('FAVIcons for blogROLL', 'faviroll').'</h2>'.$message.'
 				<form id="faviroll" name="faviroll" method="post">
-				<table class="form-table">
+				<table class="form-table" summary="">
 				<tr>
-					<td colspan="2" >
-						<p><strong>Settings</strong></p>
-					</td>
+					<td><strong>Settings</strong></td>
 				</tr>
 				<tr> 
 					<td scope="row" valign="top">Default Favicon URL:</td>
@@ -144,21 +154,18 @@ function faviroll_options(){
 					<td colspan="2" width="98%"><hr size="1" /></td>
 				</tr>
 				<tr>
-					<td><p><strong>Actions</strong></p></td>
+					<td><strong>Actions</strong></td>
 				</tr>
 				<tr>
 					<td scope="row">(re)build FavIcons now:</td>
 			    	<td><input type="checkbox" name="faviroll_renew_icons" value="true"'.(($faviroll->cacheIconsCount() == 0) ? ' checked="checked"' : null).' /></td>
 				</tr>
 				<tr>
-					<td scope="row">Remove settings and cache:</td>
+					<td scope="row" title="This will remove plugin settings from database and drop the favicon cache">Remove settings:</td>
 			    	<td><input type="checkbox" name="faviroll_remove_settings" value="true" />
 				</tr>
 				<tr> 
-					<td colspan="2">
-						<p class="submit">
-							<input type="submit" name="submit_button" value="Submit" />
-						</p>
+					<td class="submit"><input type="submit" name="submit_button" value="Submit" />
 						<input type="hidden" name="_wpnonce" value="'.$nonce.'" />
 					</td>
 				</tr>		
