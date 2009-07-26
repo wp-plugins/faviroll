@@ -3,7 +3,7 @@ Contributors: grobator
 Tags: favicons, links, icons, blogroll, bookmarks
 Requires at least: 2.7
 Tested up to: 2.8
-Stable tag: 0.4.2
+Stable tag: 0.4.4
 
 Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers (f.e. IE).
 
@@ -14,7 +14,6 @@ The plugin converts the favicon.ico from the blogroll links in PNG Image format 
 In a configured interval of dates will the favicon cache be refreshed, because the favicons from the remote site can be changed.
 
 The plugin fallback on a default favicon, if on the remote websites cannot be detected a valid favicon. The default icon can be configured.
-
 
 == Screenshots ==
 1. Faviroll's outcome
@@ -29,18 +28,17 @@ The plugin fallback on a default favicon, if on the remote websites cannot be de
 1. The locally favicon cache will be created.
 1. Thats all, enjoy.
 
-
 == Known issues ==
 * Quality loss (or wrong color transformation) at the conversion from ICO->PNG, but some browsers (f.e. Safari) has a render problem with some native ICO images, too. I'll keep it in sight.
 
-
 == Changelog ==
-
+= 0.4.4 =
+* complete (re)design cache file handling, fallback strategies and -finally- the integration into wordpress.
+* Added styles.css to easily edit the faviroll css classes.
 = 0.4.2 =
 * little code correction
 = 0.4.1 =
 * FIX: in cache directory creation fixed
-
 = 0.4 =
 * FIX: unable to create cache directory
 Some user feeback reports the plugin is unable to create cache directory which anchors in plugin folder because of missing write permissions..
