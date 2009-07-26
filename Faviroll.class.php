@@ -79,7 +79,8 @@ class Faviroll {
 			$init && update_option('faviroll_revisit', 14);
 
 		// caretaker
-		$this->gc();
+		if (is_admin())
+			$this->gc();		
 	}
 
 
@@ -309,19 +310,23 @@ class Faviroll {
 			update_option('faviroll_lastcheck',$this->lastcheck);
 		}
 
-		foreach($this->getCacheIcons() as $item) {
-			if (is_file($item))
-				@unlink($item);
+		$withsize = false;
+		$fullpath = true;
+		foreach($this->getCacheIcons($withsize,$fullpath) as $filename) {
+			if (is_file($filename))
+				@unlink($filename);
 		}
 
-		return ($this->cacheIconsCount() == 0);
+		return ($this->cacheIconsCount($withsize) == 0);
 	}
 
 
 	/**
+	 * @param $withsize [optional] If TRUE skip all "zero size" files
+	 * @param $fullpath [optional] If TRUE full filepath is returned, instead just the basename 
 	 * @return reference to List-Array with all favicon file basenames from cache directory.
 	 */
-	function &getCacheIcons() {
+	function &getCacheIcons($withsize=true,$fullpath=false) {
 
 		$result = array();
 		                               // MD5 Strings are always 32 characters f.e. cc33ac77c986e91fb30604dd516a61c7
@@ -329,9 +334,12 @@ class Faviroll {
 			$basename = basename($item);
 
 			// just collect file names with alphanumeric characters
-			if (is_file($item) && preg_match('/^[A-z0-9]+$/',$basename))
-				$result[] = $basename;
+			if (is_file($item) && preg_match('/^[A-z0-9]+$/',$basename)) {
+				if ($withsize && filesize($item) == 0)
+					continue;
 
+				$result[] = ($fullpath) ? $item : $basename;
+			}
 		}
 
 		return $result;
@@ -339,10 +347,11 @@ class Faviroll {
 
 
 	/**
+	 * @param $withsize [optional] If TRUE skip all "zero size" files
 	 * @return The count of icons in cache directory.
 	 */
-	function cacheIconsCount() {
-		return count($this->getCacheIcons());
+	function cacheIconsCount($withsize=true) {
+		return count($this->getCacheIcons($withsize));
 	}
 
 
@@ -382,11 +391,9 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 
 		update_option('faviroll_lastcheck',time());
 
-
-// DEVELOP
-#echo'</p></div><script type="text/javascript">var t = document.getElementById("message"); if (t){ t.style.display = "none"; }</script>';
-#flush();
-#ob_flush();
+		echo'</p></div><script type="text/javascript">var t = document.getElementById("message"); if (t){ t.style.display = "none"; }</script>';
+		flush();
+		ob_flush();
 
 		return true;
 	}
@@ -400,6 +407,8 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 		$this->plugindir = $this->normalize(WP_PLUGIN_DIR.'/'.$this->basename);
 		$this->cachedir = $this->normalize($this->plugindir.'/cache');
 
+
+		// -------------- [Plugin URL ermitteln ] --------------
 		$this->pluginurl = WP_PLUGIN_URL.'/'.$this->basename;
 		$elems = parse_url($this->pluginurl);
 
@@ -407,14 +416,66 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 			return false;
 
 		$pURL = trim(rtrim($elems['path'],'/'));
-		$myURL = dirname($_SERVER['PHP_SELF']);
 
-		if (strstr($pURL,$myURL))
-			$this->pluginurl = str_replace($myURL,'.',$pURL);
+		// -------------- [Request URL analysieren] --------------
+		
+		if (!isset($_SERVER['REQUEST_URI']))
+			return false;
+
+		$request = parse_url($_SERVER['REQUEST_URI']);
+		if (!isset($request['path']))
+			return false;
+
+		$cURL = trim(rtrim($request['path'],'/'));
+
+		// ------------- [try to shorten url paths on user sites] -------------
+		if (!is_admin()) {
+			$relpath = $this->getRelativePluginPath($cURL,$pURL,$request['path']);
+			if ($relpath)
+				$this->pluginurl = $relpath;
+		}
 
 		$this->cacheurl = $this->pluginurl.'/cache';
-
 		return true;
+	}
+
+
+	/**
+	 * @return relative URL to plugin path in condition to current request URL.
+	 */
+	function getRelativePluginPath($current_url, $plugin_url, $request_path) {
+
+		$result = false;
+
+		$cElems = explode('/',$current_url);
+		$pElems = explode('/',$plugin_url);
+
+		// eleminate identically path elements from both arrays
+		while (count($cElems) > 0) {
+			if ($cElems[0] == $pElems[0]) {
+				array_shift($cElems);
+				array_shift($pElems);
+			} else {
+				break;
+			}
+		}
+
+		if (count($cElems) == 0) {
+			$result = join('/',array_merge(array('.'),$pElems));
+		} else {
+
+			if (substr($request_path,-1) != '/')
+				array_pop($cElems);
+
+			$relpath = array();
+			foreach ($cElems as $item) {
+				$relpath[] = '..';
+			}
+
+			$result = join('/',array_merge($relpath,$pElems));
+		}
+
+		return $result;
 	}
 
 
@@ -438,13 +499,39 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 
 
 	/**
+	 * Check write permissions on cache directory.
+	 * @return error message if cache directory is not writable, or the string is given into method 
+	 */
+	function get_message($othermsg=null) {
+
+		// non-admin 
+		if (!is_admin() || $this->can_write_cache())
+			return $othermsg;
+
+		return "<div class='updated fade'><b>CAUTION</b>, no file permission to create icon-cache.
+<p>You have to change the permissions.<br />
+Use your ftp client, or the following command to fix it:<br />
+<br />
+<code># chmod 0755 ".$this->cachedir."</code></p></div>";
+
+	}
+
+
+	/**
+	 * @return TRUE if cache directory is writable
+	 */
+	function can_write_cache() {
+		return $this->is__writable(rtrim($this->cachedir,'/').'/');
+	}
+
+	/**
 	 * from http://de3.php.net/is_writable
 	 * Since looks like the Windows ACLs bug "wont fix" (see http://bugs.php.net/bug.php?id=27609) I propose this alternative function:
+	 * For directory check $path must end with a slash 
 	 */
 	function is__writable($path) {
-
 		if ($path{strlen($path)-1}=='/')
-			return Filetools::is__writable($path.uniqid(mt_rand()).'.tmp');
+			return $this->is__writable($path.uniqid(mt_rand()).'.tmp');
 
 		if (file_exists($path)) {
 			if (!($f = @fopen($path, 'r+')))
@@ -613,14 +700,10 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 			// set favicon from cache or fallback to default
 			$favicon = (in_array($checksum,$cacheIcons)) ? $this->cacheurl."/$checksum" : $default_favicon;
 
-			$token = preg_split('/<li(.*)><a(.*)/',$line);
-
-echo "<pre>";
-echo var_export($token ,true);
-echo "</pre>";
+			$token = preg_split('/<(li(\s*)|a(\s*))/',$line);
 
 			if (count($token) == 3)
-				$line = '<li '.$token[1].'<a style="padding-left:18px; background:url('.$favicon.') 0px center no-repeat;" class="faviroll"'.$token[2];
+				$line = '<li class="faviroll"><a style="padding-left:18px; background:url('.$favicon.') 0px center no-repeat;" class="faviroll"'.$token[2];
 
 			$newContent[] = $line;
 		}

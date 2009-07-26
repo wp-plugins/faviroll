@@ -34,7 +34,6 @@ require_once('Faviroll.class.php');
  * Main function
  */
 function faviroll_list_bookmarks($output) {
-
 	$faviroll = new Faviroll();
 	return $faviroll->apply($output);
 }
@@ -126,13 +125,12 @@ function faviroll_options(){
 
 	}
 
-
 	if (!is_null($message))
 		$message = '<div class="updated fade below-h2" id="message"><p>'.$message.'</p></div>';
 
 	echo '
 			<div class="wrap">
-				<h2>'.__('FAVIcons for blogROLL', 'faviroll').'</h2>'.$message.'
+				<h2>'.__('FAVIcons for blogROLL', 'faviroll').'</h2>'.$faviroll->get_message($message).'
 				<form id="faviroll" name="faviroll" method="post">
 				<table class="form-table" summary="">
 				<tr>
@@ -148,7 +146,9 @@ function faviroll_options(){
 				</tr>
 				<tr>
 					<td scope="row">Use transparent background:</td>
-			    	<td><input type="checkbox" name="faviroll_transparency" value="on"'.($is_transparency ? ' checked="checked"' : null).' /></td>
+			    	<td><input type="checkbox" name="faviroll_transparency" value="on"'.($is_transparency ? ' checked="checked"' : null).' />
+			    	&nbsp;&nbsp;&nbsp;<a href="plugin-editor.php?file=faviroll/style.css&plugin=faviroll/faviroll.php" title="Edit the faviroll css-styles">Edit faviroll stylesheet</a>
+			   	</td>
 				</tr>
 				<tr>
 					<td colspan="2" width="98%"><hr size="1" /></td>
@@ -164,11 +164,11 @@ function faviroll_options(){
 					<td scope="row" title="This will remove plugin settings from database and drop the favicon cache">Remove settings:</td>
 			    	<td><input type="checkbox" name="faviroll_remove_settings" value="true" />
 				</tr>
-				<tr> 
+				<tr>
 					<td class="submit"><input type="submit" name="submit_button" value="Submit" />
 						<input type="hidden" name="_wpnonce" value="'.$nonce.'" />
 					</td>
-				</tr>		
+				</tr>
 				</table>
 				</form>
 			</div>
@@ -187,6 +187,15 @@ function faviroll_menu() {
 }
 add_action('admin_menu', 'faviroll_menu');
 
+
+
+/**
+ * Register Enqueue CSS
+ */
+function faviroll_enqueue_scripts() {
+	wp_enqueue_style('faviroll', WP_PLUGIN_URL.'/faviroll/style.css', false, false, 'all');
+}
+add_action('wp_enqueue_scripts', 'faviroll_enqueue_scripts');
 
 /* eof */
 ?>
