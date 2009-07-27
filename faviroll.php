@@ -2,7 +2,7 @@
 /*
 Plugin Name: FAVIROLL - FAVIcons for blogROLL
 Plugin URI: http://www.grobator.de/wordpress-stuff/plugins/faviroll
-Description: Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers/operating systems. <strong><a href="options-general.php?page=faviroll.php">Settings &raquo; Faviroll</a></strong>
+Description: Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers/operating systems. <strong><a href="link-manager.php?page=faviroll.php">Settings &raquo; Faviroll</a></strong>
 Author: grobator
 Version:  0.4.3
 Author URI:  http://www.grobator.de/
@@ -183,7 +183,7 @@ function faviroll_options(){
  * Register Faviroll menu in general options menu
  */
 function faviroll_menu() {
-	add_submenu_page('options-general.php', __('Faviroll', 'faviroll'), __('Faviroll', 'faviroll'), 8, basename(__FILE__), 'faviroll_options');
+	add_submenu_page('link-manager.php', __('Faviroll', 'faviroll'), __('Faviroll', 'faviroll'), 8, basename(__FILE__), 'faviroll_options');
 }
 add_action('admin_menu', 'faviroll_menu');
 
