@@ -101,14 +101,17 @@ class Faviroll {
 		if (!is_dir($favidir))
 			return true;
 
-		// MD5 Strings are always 32 characters
-		foreach(@glob($favidir.'/????????????????????????????????') as $item) {
+		// MD5 Strings are always 32 characters f.e. cc33ac77c986e91fb30604dd516a61c7
+		$pattern = $this->cachedir.'/????????????????????????????????'; 
+		$items = @glob($pattern);
+		if ($items === false)
+			return $result;
+
+		foreach($items as $item) {
 			if (is_file($item) && preg_match('/^[A-z0-9]+$/',basename($item)))
 				@unlink($item);
 		}
 		@rmdir($favidir);
-		// -------------------------------------------
-
 	}
 
 
@@ -329,8 +332,14 @@ class Faviroll {
 	function &getCacheIcons($withsize=true,$fullpath=false) {
 
 		$result = array();
-		                               // MD5 Strings are always 32 characters f.e. cc33ac77c986e91fb30604dd516a61c7
-		foreach(@glob($this->cachedir.'/????????????????????????????????') as $item) {
+
+		// MD5 Strings are always 32 characters f.e. cc33ac77c986e91fb30604dd516a61c7
+		$pattern = $this->cachedir.'/????????????????????????????????'; 
+		$items = @glob($pattern);
+		if ($items === false)
+			return $result;
+
+		foreach($items as $item) {
 			$basename = basename($item);
 
 			// just collect file names with alphanumeric characters
@@ -703,7 +712,7 @@ Use your ftp client, or the following command to fix it:<br />
 			$token = preg_split('/<(li(\s*)|a(\s*))/',$line);
 
 			if (count($token) == 3)
-				$line = '<li class="faviroll"><a style="padding-left:18px; background:url('.$favicon.') 0px center no-repeat;" class="faviroll"'.$token[2];
+				$line = '<li class="faviroll"><a style="padding-left:18px; background:url('.$favicon.') 0px center no-repeat;" class="faviroll" '.$token[2];
 
 			$newContent[] = $line;
 		}

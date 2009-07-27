@@ -4,7 +4,7 @@ Plugin Name: FAVIROLL - FAVIcons for blogROLL
 Plugin URI: http://www.grobator.de/wordpress-stuff/plugins/faviroll
 Description: Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers/operating systems. <strong><a href="options-general.php?page=faviroll.php">Settings &raquo; Faviroll</a></strong>
 Author: grobator
-Version:  [[ **BETA** ]]
+Version:  0.4.3
 Author URI:  http://www.grobator.de/
 ----------------------------------------------------------------------------------------
 Copyright 2009 grobator  (email: http://www.grobator.de/kontakt)

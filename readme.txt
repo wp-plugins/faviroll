@@ -3,7 +3,7 @@ Contributors: grobator
 Tags: favicons, links, icons, blogroll, bookmarks
 Requires at least: 2.7
 Tested up to: 2.8
-Stable tag: 0.4.4
+Stable tag: 0.4.3
 
 Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers (f.e. IE).
 
@@ -32,7 +32,7 @@ The plugin fallback on a default favicon, if on the remote websites cannot be de
 * Quality loss (or wrong color transformation) at the conversion from ICO->PNG, but some browsers (f.e. Safari) has a render problem with some native ICO images, too. I'll keep it in sight.
 
 == Changelog ==
-= 0.4.4 =
+= 0.4.3 =
 * complete (re)design cache file handling, fallback strategies and -finally- the integration into wordpress.
 * Added styles.css to easily edit the faviroll css classes.
 = 0.4.2 =
