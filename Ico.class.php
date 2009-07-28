@@ -23,6 +23,11 @@
 
 class Ico {
 	/**
+	 * Ico::rawdata
+	 * contains the original data, if image format != "ico".
+	 */
+
+	/**
 	 * Ico::bgcolor
 	 * Background color on icon extraction
 	 *
@@ -89,35 +94,44 @@ class Ico {
 	function LoadData($data) {
 		$this->formats = array();
 
-		if ($this->is_text($data))
-			return false;
+#echo $this->detectImageFormat($data);
+
+		switch ($this->detectImageFormat($data)) {
+			case 'txt':
+			case false:
+				return false;
+				break;
+
+			case 'ico':
+				break;
+			
+			default:
+				$this->rawdata = $data;
+				return true;
+				break;
+		}
 
 		/**
 		 * ICO header
 		 **/
 		$icodata = unpack("SReserved/SType/SCount", $data);
 
-		// If Count attribut not present, put all data "as is" into Member $rawdata and get out here.
-		if ($icodata['Count'] < 1) {
-			$this->rawdata = $data;
-			return true;
-		}
+		$header = $icodata;
 
-
-		$this->ico = $icodata;
+		// cut off header
 		$data = substr($data, 6);
 
 		/**
 		 * Extract each icon header
 		 **/
-		for ($i = 0; $i < $this->ico['Count']; $i ++) {
+		for ($i = 0; $i < $header['Count']; $i ++) {
 
 				if (strlen($data) < 1)
 					continue;
 
 				$icodata = unpack("CWidth/CHeight/CColorCount/CReserved/SPlanes/SBitCount/LSizeInBytes/LFileOffset", $data);
 
-				$icodata['FileOffset'] -= ($this->ico['Count'] * 16) + 6;
+				$icodata['FileOffset'] -= ($header['Count'] * 16) + 6;
 				if ($icodata['ColorCount'] == 0) $icodata['ColorCount'] = 256;
 				$this->formats[] = $icodata;
 
@@ -441,18 +455,44 @@ class Ico {
 	 **/
 	function AllocateColor(&$im, $red, $green, $blue, $alpha = 0) {
 			$c = imagecolorexactalpha($im, $red, $green, $blue, $alpha);
-			if ($c >= 0) {
+			if ($c >= 0)
 					return $c;
-			}
+
 			return imagecolorallocatealpha($im, $red, $green, $blue, $alpha);
 	}
 
 
+// ---------------------------- [extended functions by grobator] ----------------------------
+
+	/**
+	 * @return the image type as string or FALSE if $data is empty.
+	 */
+	function detectImageFormat(&$data) {
+
+		if ($this->is_text($data)) {
+			return 'txt';
+		} elseif ($this->is_png($data)) {
+			return 'png';
+		} elseif ($this->is_ico($data)) {
+			return 'ico';
+		} elseif ($this->is_jpg($data)) {
+			return 'jpg';
+		} elseif ($this->is_gif($data)) {
+			return 'gif';
+		} elseif ($this->is_tif($data)) {
+			return 'tif';
+		} elseif ($this->is_bmp($data)) {
+			return 'bmp';
+		} 
+
+		return false;
+
+	}
 
 	/**
 	 * @see http://www.patshaping.de/hilfen_ta/codeschnipsel/php-binaryfile.htm
 	 */
-	function is_text($s) {
+	function is_text(&$s) {
 
 		if(strpos($s,"\0") === true) return false;
 		if(!$s)                      return false;
@@ -466,6 +506,92 @@ class Ico {
 		}
 
 		return (strlen($t) / strlen($s) < 0.3);
+	}
+
+	/**
+	 * @see http://www.onicos.com/staff/iz/formats/gif.html 
+	 * @see http://de.wikipedia.org/wiki/Magische_Zahl_%28Informatik%29#Magische_Zahlen_zur_Kennzeichnung_von_Dateitypen
+	 * @TODO: documentation
+	 */
+	function is_gif(&$data) {
+
+		if (strlen($data) < 10)
+			return false;
+
+		return (preg_match('/GIF8[79]a$/',substr($data,0,6)));
+	}
+
+	/**
+	 * @see http://de.wikipedia.org/wiki/Magische_Zahl_%28Informatik%29#Magische_Zahlen_zur_Kennzeichnung_von_Dateitypen
+	 * magic: \211 P N G \r \n \032 \n (0x89504e470d0a1a0a)
+	 */
+	function is_png(&$data) {
+
+		if (strlen($data) < 10)
+			return false;
+
+		$header = join ('',unpack('H16', $data));
+
+		return ($header == '89504e470d0a1a0a');
+	}
+
+
+	/**
+	 * @see http://de.wikipedia.org/wiki/Magische_Zahl_%28Informatik%29#Magische_Zahlen_zur_Kennzeichnung_von_Dateitypen
+	 */
+	function is_jpg(&$data) {
+
+		if (strlen($data) < 22)
+			return false;
+
+		$header = join ('',unpack('H20', $data));
+
+		return (substr($header,0,6) == 'ffd8ff' && strstr($header,'4a464946') !== false);
+	}
+
+	/**
+	 * @param &$data - the image binary data
+	 * 
+	 * @see http://en.wikipedia.org/wiki/ICO_%28file_format%29#Header
+	 * Offset# 	Size 	Purpose
+	 * 0        2     reserved. should always be 0
+	 * 2        2     type. 1 for icon (.ICO), 2 for cursor (.CUR) file
+	 * 4        2     count; number of images in the file
+	 */
+	function is_ico(&$data) {
+		if (strlen($data) < 10)
+			return false;
+
+		extract(unpack('Sreserved/Stype/Scount', $data),EXTR_OVERWRITE|EXTR_REFS);
+
+		$isOk = ($reserved === 0);
+		$isOk = ($isOk && ($type > 0 && $type < 3));
+
+		return ($isOk && ($count > 0));
+	}
+
+
+	/**
+	 * @see http://de.wikipedia.org/wiki/Magische_Zahl_%28Informatik%29#Magische_Zahlen_zur_Kennzeichnung_von_Dateitypen
+	 */
+	function is_tif(&$data) {
+
+		if (strlen($data) < 10)
+			return false;
+
+		return preg_match('/^(II|MM)$/',substr($data,0,2));
+	}
+
+
+	/**
+	 * @see http://de.wikipedia.org/wiki/Windows_Bitmap#Dateikopf
+	 */
+	function is_bmp(&$data) {
+
+		if (strlen($data) < 4)
+			return false;
+
+		return (substr($data,0,2) == 'BM');
 	}
 
 }
