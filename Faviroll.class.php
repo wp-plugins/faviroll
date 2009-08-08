@@ -24,14 +24,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 class Faviroll {
 
 	// Members
-	var $basename = null;
 	var $cachedir = null;
 	var $cacheurl = null;
 	var $pluginurl = null;
-	var $plugindir = null;
 	var $lastcheck = null;
 	var $defaulticon = null;
 	var $transparency = null;
+	var $debug = false;
 
 
 	/**
@@ -49,7 +48,6 @@ class Faviroll {
 	 */
 	function __construct($init=true) {
 
-		$this->basename = plugin_basename(dirname(__FILE__));
 		$this->initURLsAndDirs();
 
 		$this->defaulticon = get_option('faviroll_default_favicon');
@@ -77,6 +75,13 @@ class Faviroll {
 		$revisit = get_option('faviroll_revisit');
 		if (empty($revisit))
 			$init && update_option('faviroll_revisit', 14);
+
+		// default is enabled background tranparency.
+		$this->debug = get_option('faviroll_debug');
+		if (empty($this->debug))
+			$init && update_option('faviroll_debug','off');
+
+		$this->debug = (get_option('faviroll_debug') == 'on');
 
 		// caretaker
 		if (is_admin())
@@ -185,7 +190,7 @@ class Faviroll {
 			} elseif (isset($ico->rawdata)) {
 
 				$handle = @fopen($icopath,'wb');
-				if ($handle) {
+				if ($handle !== false) {
 					fwrite($handle,$ico->rawdata);
 					fflush($handle);
 					fclose($handle);
@@ -401,6 +406,7 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 		update_option('faviroll_lastcheck',time());
 
 		echo'</p></div><script type="text/javascript">var t = document.getElementById("message"); if (t){ t.style.display = "none"; }</script>';
+
 		flush();
 		ob_flush();
 
@@ -413,12 +419,11 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 	 */
 	function initURLsAndDirs() {
 
-		$this->plugindir = $this->normalize(WP_PLUGIN_DIR.'/'.$this->basename);
-		$this->cachedir = $this->normalize($this->plugindir.'/cache');
-
+		$this->cachedir = $this->normalize(plugin_dir_path(__FILE__).'/cache');
 
 		// -------------- [Plugin URL ermitteln ] --------------
-		$this->pluginurl = WP_PLUGIN_URL.'/'.$this->basename;
+		$this->pluginurl = plugin_dir_url(__FILE__);
+
 		$elems = parse_url($this->pluginurl);
 
 		if (!isset($elems['path']))
@@ -435,6 +440,7 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 		if (!isset($request['path']))
 			return false;
 
+
 		$cURL = trim(rtrim($request['path'],'/'));
 
 		// ------------- [try to shorten url paths on user sites] -------------
@@ -444,7 +450,7 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 				$this->pluginurl = $relpath;
 		}
 
-		$this->cacheurl = $this->pluginurl.'/cache';
+		$this->cacheurl = trim(rtrim($this->pluginurl,'/')).'/cache';
 		return true;
 	}
 
@@ -458,6 +464,7 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 
 		$cElems = explode('/',$current_url);
 		$pElems = explode('/',$plugin_url);
+
 
 		// eleminate identically path elements from both arrays
 		while (count($cElems) > 0) {
@@ -473,6 +480,8 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 			$result = join('/',array_merge(array('.'),$pElems));
 		} else {
 
+			// Wenn der Request Path nicht mit Slash endet, entferne den letzten Namen,
+			// da dann das Verzeichnis darüber gilt. Quasi der "dirname()"
 			if (substr($request_path,-1) != '/')
 				array_pop($cElems);
 
@@ -521,7 +530,7 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 <p>You have to change the permissions.<br />
 Use your ftp client, or the following command to fix it:<br />
 <br />
-<code># chmod 0755 ".$this->cachedir."</code></p></div>";
+<code># chmod 0775 ".$this->cachedir."</code></p></div>";
 
 	}
 
@@ -532,6 +541,7 @@ Use your ftp client, or the following command to fix it:<br />
 	function can_write_cache() {
 		return $this->is__writable(rtrim($this->cachedir,'/').'/');
 	}
+
 
 	/**
 	 * from http://de3.php.net/is_writable
@@ -617,9 +627,6 @@ Use your ftp client, or the following command to fix it:<br />
 			}
 		}
 
-# debugging
-#echo "<p>$typeOfURL<br>$faviconURL</p>";
-
 		if($this->validateURL($faviconURL))
 			return $faviconURL;
 
@@ -663,6 +670,45 @@ Use your ftp client, or the following command to fix it:<br />
 		return ($http_response == 'HTTP/');
 	}
 
+
+	/**
+	 * TODO
+	 */
+	function patchPlugin($plugindir,$activate=false) {
+
+		$result = null;	
+
+		foreach (get_plugins() as $path => $data) {
+			if (strpos($path,$plugindir) === 0) {
+				$pluginfile = $path;
+				break;
+			}
+		}
+
+		if (!isset($pluginfile))
+			return true;
+
+		$pluginfile = WP_PLUGIN_DIR."/$pluginfile";
+		if (!is_file($pluginfile) || !is_writable($pluginfile))
+			return true;
+
+		switch ($plugindir) {
+			case 'wp-render-blogroll-links':
+
+				break;
+			default:
+				break;
+		}
+
+		return true;
+	}
+
+
+
+
+
+
+
 // -----------------------Non - Admin Functions -----------------------------------------------------------------------
 
 	/**
@@ -674,7 +720,7 @@ Use your ftp client, or the following command to fix it:<br />
 		// get default icon from database
 		$default_favicon = get_option('faviroll_default_favicon');
 
-		// get cached icon list
+		// get list of cached icons
 		$cacheIcons = $this->getCacheIcons();
 
 		// split bookmarks in lines
@@ -687,21 +733,24 @@ Use your ftp client, or the following command to fix it:<br />
 
 			$line = trim($line);
 
-			if (!preg_match('/href=[\'"](.*)[\'"]/', $line, $matches) && !preg_match('/img/', $line)) {
+			if (!(bool) @preg_match('/a[\s]+[^>]*?href[\s]?=[\s\"\']+(.*?)[\"\']+.*?>([^<]+|.*?)?<\/a>/i', $line, $matches)) {
 				// overhead stuff
 				$newContent[] = $line;
 				continue;
 			}
 
-			if (count($matches) < 2) {
+			if (count($matches) < 3) {
 				// overhead stuff
 				$newContent[] = $line;
 				continue;
 			}
 
-			extract($this->getURLinfo($matches[1]),EXTR_OVERWRITE);
+			$urlInfo = $this->getURLinfo($matches[1]);
+			extract($urlInfo,EXTR_OVERWRITE);
+
+			// Es konnte keine Checksumme ermittelt werden
+			// also einfach die Zeile as-is übernehmen
 			if (!isset($checksum)) {
-				// overhead stuff
 				$newContent[] = $line;
 				continue;
 			}
@@ -716,6 +765,7 @@ Use your ftp client, or the following command to fix it:<br />
 
 			$newContent[] = $line;
 		}
+
 
 		return "<!-- Begin:FaviRoll Plugin -->\n".implode("\n",$newContent)."\n<!-- End:FaviRoll Plugin -->";
 	}
