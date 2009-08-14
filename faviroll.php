@@ -4,7 +4,7 @@ Plugin Name: FAVIROLL - FAVIcons for blogROLL
 Plugin URI: http://www.grobator.de/wordpress-stuff/plugins/faviroll
 Description: Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers/operating systems. <strong><a href="link-manager.php?page=faviroll.php">Settings &raquo; Faviroll</a></strong>
 Author: grobator
-Version:  0.4.5
+Version:  0.4.5.1
 Author URI:  http://www.grobator.de/
 ----------------------------------------------------------------------------------------
 Copyright 2009 grobator  (email: http://www.grobator.de/kontakt)
@@ -75,7 +75,6 @@ add_action('add_link' , 'faviroll_single_favicon');
  */
 function faviroll_options(){
 
-faviroll_activate();
 	$message = null;
 	$removeSettings = isset($_REQUEST['faviroll_remove_settings']);
 
@@ -136,12 +135,14 @@ faviroll_activate();
   <h2 style="display:inline;">'.__('FAVIcons for blogROLL', 'faviroll').'</h2>'.$faviroll->get_message($message).'<br />
   <h4 style="display:inline;">Currently [ '.$faviroll->cacheIconsCount().' ] icons in the cache directory.</h4> 
 
- <div style="float: right;"><form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+ <div style="float: right;">
+ <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
  <input type="hidden" name="cmd" value="_s-xclick">
  <input type="hidden" name="hosted_button_id" value="7362367">
- <input type="image" src="https://www.paypalobjects.com/WEBSCR-580-20090807-1/de_DE/DE/i/btn/x-click-butcc-donate.gif" border="0" name="submit" alt="Make a donation" title="Make a donation">
+ <input type="image" src="https://www.paypal.com/en_GB/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="donate" title="Sollte Ihnen das Plugin gefallen, w&auml;re ich &uuml;ber eine kleine Spende sehr erfreut">
  <img alt="" border="0" src="https://www.paypal.com/de_DE/i/scr/pixel.gif" width="1" height="1">
- </form></div>
+ </form>
+ </div>
 
    <form id="faviroll" name="faviroll" method="post">
     <table class="form-table" summary="">

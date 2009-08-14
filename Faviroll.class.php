@@ -83,40 +83,6 @@ class Faviroll {
 
 		$this->debug = (get_option('faviroll_debug') == 'on');
 
-		// caretaker
-		if (is_admin())
-			$this->gc();		
-	}
-
-
-	/**
-	 * Garbage collector will clean up trash from older versions
-	 */
-	function gc() {
-
-		// -------------------------------------------
-		// Veraltetes cache Verzeichnis abräumen
-		// Cache dir until version 0.4.2
-		//
-		$dir = wp_upload_dir('2009/07');
-		if (!isset($dir['path']))
-			return true;
-		
-		$favidir = $dir['path'].'/faviroll_cache';
-		if (!is_dir($favidir))
-			return true;
-
-		// MD5 Strings are always 32 characters f.e. cc33ac77c986e91fb30604dd516a61c7
-		$pattern = $this->cachedir.'/????????????????????????????????'; 
-		$items = @glob($pattern);
-		if ($items === false)
-			return $result;
-
-		foreach($items as $item) {
-			if (is_file($item) && preg_match('/^[A-z0-9]+$/',basename($item)))
-				@unlink($item);
-		}
-		@rmdir($favidir);
 	}
 
 
@@ -672,7 +638,9 @@ Use your ftp client, or the following command to fix it:<br />
 
 
 	/**
-	 * TODO
+	 * Patcht fremde Plugins, um die Zusammenarbeit mit Faviroll herzustellen
+	 * @param $plugindir Plugin directory of the foreign plugin
+	 * @param boolean $activate TRUE = Faviroll plugin is activated, FALSE = Faviroll plugin is disabled
 	 */
 	function patchPlugin($plugindir,$activate=false) {
 
@@ -692,17 +660,67 @@ Use your ftp client, or the following command to fix it:<br />
 		if (!is_file($pluginfile) || !is_writable($pluginfile))
 			return true;
 
+
 		switch ($plugindir) {
 			case 'wp-render-blogroll-links':
+				// In diesem Plugin die Zeile 164 patchen.
+
+				$lines = @file($pluginfile);
+				if ($lines === false || count($lines) < 165)
+					return true;
+
+				$line = trim($lines[164]);
+
+				// # Die betreffende Zeile erkennen.
+				if (!preg_match("/(apply_filters)+.*('wp_list_bookmarks_plus')+/",$line))
+					return true;
 
 				break;
 			default:
 				break;
+		}			
+
+		if ($activate) {
+
+			switch ($plugindir) {
+				case 'wp-render-blogroll-links':
+
+					// Patch ausführen, Kommentar entfernen
+					$lines[164] = "	".preg_replace('#^[/\s]+#','',$line)."\n";
+					$handle = @fopen($pluginfile,'w');
+					if ($handle !== false) {
+						fwrite($handle,join('',$lines));
+						fflush($handle);
+						fclose($handle);
+					}
+
+					break;
+				default:
+					break;
+			}
+		} else {
+			switch ($plugindir) {
+				case 'wp-render-blogroll-links':
+
+					// Kommentar wieder davorschreiben
+					$lines[164] = "	// $line\n";
+
+					$handle = @fopen($pluginfile,'w');
+					if ($handle !== false) {
+						fwrite($handle,join('',$lines));
+						fflush($handle);
+						fclose($handle);
+					}
+
+					break;
+				default:
+					break;
+			}
+
 		}
 
 		return true;
 	}
-
 
 
 
