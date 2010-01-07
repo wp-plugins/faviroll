@@ -2,8 +2,8 @@
 Contributors: grobator
 Tags: favicons, links, icons, blogroll, bookmarks
 Requires at least: 2.7
-Tested up to: 2.8
-Stable tag: 0.4.5.1
+Tested up to: 2.9.1, (WPMU 2.8.6)
+Stable tag: 0.4.6
 
 Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers (f.e. IE).
 
@@ -22,47 +22,57 @@ The plugin fallback on a default favicon, if on the remote websites cannot be de
 4. Remove the double slashes in WP-Render-Blogroll.php, if you want to have the faviroll icons in the blogroll of this plugin.
 
 == Installation ==
-
 1. Upload the folder faviroll to the /wp-content/plugins/ directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 1. Initialize plugin with its settings in general options by clicking the 'Submit' button.
 1. The locally favicon cache will be created.
 1. Thats all, enjoy.
 
-== Known issues ==
-* Quality loss (or wrong color transformation) at the conversion from ICO->PNG, but some browsers (f.e. Safari) has a render problem with some native ICO images, too. I'll keep it in sight.
-
 == Changelog ==
-= 0.4.5.1 =
-* Code "polish"
-* Try to enable/disable the availability with http://wordpress.org/extend/plugins/wp-render-blogroll-links/
+Explanation:
 
+* FEA = Implemented feature
+* BUG = Resolved bug
+* OPT = Optimization
+* CLN = Cleanup/Refactoring
+* OTH = Other
+
+= 0.4.6 =
+* FIX: Icon Color "irritation" is fixed now.<br />
+Many thanks to: http://www.tom-reitz.com/2009/02/17/php-ico-to-png-conversion/
+* OPT: Users asked for WordPress MU support....Here it is.
+* OTH: Revisit default days changed from 14 to 180 days (1/2 year should be enough)
+= 0.4.5.1 =
+* CLN: Code "polish"
+* OPT: Try to enable/disable the availability with http://wordpress.org/extend/plugins/wp-render-blogroll-links/
 = 0.4.5 =
-* FIXED: Parser has not recognized Blogroll-Links with additional attributes like title="...", rel="...", etc.
+* FIX: Parser has not recognized Blogroll-Links with additional attributes like title="...", rel="...", etc.<br />
 Many many thanks for patient debugging support of: http://www.heiniger-net.ch/daniel
 * prepared for the new version of http://wordpress.org/extend/plugins/wp-render-blogroll-links/
 * Unfortunately this plugin needs a little patch. See Screenshot-4.
 = 0.4.4 =
-* Settings panel now you can find under "Links".
-* Image type recognition. Just the ICO image is converted into PNG. All other image formats are bypass direct into the local cache. This will maximize the usage of the foreign favicons.
+* CLN: Settings panel now you can find under "Links".
+* Image type recognition. Just the ICO image is converted into PNG.<br />
+All other image formats are bypass direct into the local cache.<br />
+This will maximize the usage of the foreign favicons.
 = 0.4.3 =
 * complete (re)design cache file handling, fallback strategies and -finally- the integration into wordpress.
 * Added styles.css to easily edit the faviroll css classes.
 = 0.4.2 =
-* little code correction
+* CLN: little code correction
 = 0.4.1 =
 * FIX: in cache directory creation fixed
 = 0.4 =
-* FIX: unable to create cache directory
-Some user feeback reports the plugin is unable to create cache directory which anchors in plugin folder because of missing write permissions..
-Now I use wordpress core function `wp_upload_dir()` to create the (persistent) cache into the "uploads" note.
-Hopefully now it works all over.
+* FIX: unable to create cache directory.<br />
+Some user feeback reports the plugin is unable to create cache directory which anchors in plugin folder because of missing write permissions.<br />
+Now I use wordpress core function `wp_upload_dir()` to create the (persistent) cache into the "uploads" note.<br />
+Hopefully now it works all over.<br />
 
 = 0.3.2 =
-* same like version 0.3
+* OTH: same like version 0.3
 
 = 0.3 =
-* internal "fight" with subversion. No code changes.
+* OTH: internal "fight" with subversion. No code changes.
 
 = 0.2 =
 * added screenshots
@@ -71,3 +81,10 @@ Hopefully now it works all over.
 
 = 0.1 =
 * Initial version
+
+== Upgrade notice ==
+There is nothing to do for you
+
+== Frequently Asked Questions ==
+= Do the plugin work with WordPress MU? =
+ Yes, since plugin version 0.4.6 

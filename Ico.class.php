@@ -297,10 +297,22 @@ class Ico {
 							 **/
 							$c = array();
 							for ($i = 0; $i < $this->formats[$index]['ColorCount']; $i++) {
-									$c[$i] = $this->AllocateColor($im, $this->formats[$index]['colors'][$i]['red'],
-																										 $this->formats[$index]['colors'][$i]['green'],
-																										 $this->formats[$index]['colors'][$i]['blue'],
-																										 round($this->formats[$index]['colors'][$i]['reserved'] / 255 * 127));
+
+/*
+  # Original Code
+	$c[$i] = $this->AllocateColor($im, $this->formats[$index]['colors'][$i]['red'],
+						 												 $this->formats[$index]['colors'][$i]['green'],
+																		 $this->formats[$index]['colors'][$i]['blue'],
+																		 round($this->formats[$index]['colors'][$i]['reserved'] / 255 * 127));
+*/
+
+							  // Thanks to: http://www.tom-reitz.com/2009/02/17/php-ico-to-png-conversion/
+							  //
+								$c[$i] = $this->AllocateColor($im, $this->formats[$index]['colors'][$i]['blue'],
+    																						     $this->formats[$index]['colors'][$i]['green'],
+																						         $this->formats[$index]['colors'][$i]['red'],
+																						         round($this->formats[$index]['colors'][$i]['reserved'] / 255 * 127));
+							
 							}
 					}
 

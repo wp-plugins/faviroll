@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 class Faviroll {
 
 	// Members
+	var $prefix = '';
 	var $cachedir = null;
 	var $cacheurl = null;
 	var $pluginurl = null;
@@ -48,6 +49,7 @@ class Faviroll {
 	 */
 	function __construct($init=true) {
 
+		$this->setPrefix();
 		$this->initURLsAndDirs();
 
 		$this->defaulticon = get_option('faviroll_default_favicon');
@@ -74,7 +76,7 @@ class Faviroll {
 		// initialize with useful default.
 		$revisit = get_option('faviroll_revisit');
 		if (empty($revisit))
-			$init && update_option('faviroll_revisit', 14);
+			$init && update_option('faviroll_revisit', 180);
 
 		// default is enabled background tranparency.
 		$this->debug = get_option('faviroll_debug');
@@ -101,6 +103,18 @@ class Faviroll {
 
 	}
 
+	/**
+	 * For WordPress MU. Any MU user has a blogid, which must be included into the cache file name. 
+	 */
+	function setPrefix() {
+		global $wpdb;
+
+		if (isset($wpdb->base_prefix) && isset($wpdb->blogid))
+			$this->prefix = $wpdb->base_prefix.$wpdb->blogid.'-';
+
+	}
+	
+	
 
 	/**
 	 * @return the factory default favicon URL
@@ -122,15 +136,15 @@ class Faviroll {
 
 		if ($verbose) {
 			echo "<p>${bookmark}....";
-			flush();
 			ob_flush();
+			flush();
 		}
 
 		extract($this->getURLinfo($bookmark),EXTR_OVERWRITE);
-		if (!isset($checksum))
+		if (!isset($basename))
 			return false;
 
-		$icopath = $this->cachedir."/$checksum";
+		$icopath = $this->cachedir."/$basename";
 
 		// truncate cache icon file
 		fclose(fopen($icopath,'w'));
@@ -191,15 +205,15 @@ class Faviroll {
 		$result = (is_file($icopath) && (filesize($icopath) > 0));
 
 		if ($verbose) {
-			echo '<br />&nbsp;<img src="'.(($result) ? $this->cacheurl."/$checksum" : $this->defaulticon).'" />';
+			echo '<br />&nbsp;<img src="'.(($result) ? $this->cacheurl."/$basename" : $this->defaulticon).'" />';
 
 			if (!strlen($icourl))
 				$icourl = 'fallback to default favicon';
 
 			echo "&nbsp; ( $icourl )</p>";
 
-			flush();
 			ob_flush();
+			flush();
 		}
 
 		return $result;
@@ -207,7 +221,7 @@ class Faviroll {
 
 
 	/**
-	 * @return reference to Hash-Array with the keys: [checksum], [rooturl]
+	 * @return reference to Hash-Array with the keys: [basename], [rooturl]
 	 */
 	function &getURLinfo($bookmark) {
 
@@ -223,15 +237,11 @@ class Faviroll {
 			$pathinfo = pathinfo($lk_path);
 			extract($pathinfo,EXTR_PREFIX_ALL|EXTR_OVERWRITE|EXTR_REFS,'pi');
 
-			if ($pi_basename == $pi_filename) {
-				$lk_path = '/';
-			} else {
-				$lk_path = dirname($lk_path).'/';
-			}
+			$lk_path = ($pi_basename == $pi_filename) ? '/' : dirname($lk_path).'/';
 		}
  
 
-		// Build URL identify build MD5 checksum for cached favicons name
+		// cached favicons filenames are build with prefix (for WPMU) and MD5 checksum from the favicon
 		$rooturl = '';
 		if (isset($lk_scheme))
 			$rooturl.= "${lk_scheme}://";
@@ -241,7 +251,7 @@ class Faviroll {
 			$rooturl.= $lk_path;
 
 		// md5 cecksum of root-URL is name of favicon cache file
-		$result['checksum'] = md5(strtolower($rooturl));
+		$result['basename'] = $this->prefix.md5(strtolower($rooturl));
 		$result['rooturl'] = $rooturl;
 
 		return $result;
@@ -305,7 +315,7 @@ class Faviroll {
 		$result = array();
 
 		// MD5 Strings are always 32 characters f.e. cc33ac77c986e91fb30604dd516a61c7
-		$pattern = $this->cachedir.'/????????????????????????????????'; 
+		$pattern = $this->cachedir.'/'.$this->prefix.'????????????????????????????????'; 
 		$items = @glob($pattern);
 		if ($items === false)
 			return $result;
@@ -314,7 +324,7 @@ class Faviroll {
 			$basename = basename($item);
 
 			// just collect file names with alphanumeric characters
-			if (is_file($item) && preg_match('/^[A-z0-9]+$/',$basename)) {
+			if (is_file($item) && preg_match('/^[0-9A-Z_\-a-z]+$/',$basename)) {
 				if ($withsize && filesize($item) == 0)
 					continue;
 
@@ -348,11 +358,9 @@ class Faviroll {
 
 		if ($offsetFromNow < $this->lastcheck)
 			return false;
-
-
+			
 		// Max. Laufzeit auf 5 Min. setzen
 		@ini_set('max_execution_time',300);
-
 
 		echo '<div class="updated fade below-h2" id="message"><p>
 <b>
@@ -361,9 +369,7 @@ This may be take some time... stay tuned, please!<br />
 <br />
 Cache directory = '.$this->cachedir.'<br /></b>';
 
-		flush();
-		ob_flush();
-
+			
 		# ---------- next stage 
 		foreach(get_bookmarks() as $link) {
 			$this->putIconIntoCache($link,true);
@@ -371,11 +377,10 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 
 		update_option('faviroll_lastcheck',time());
 
-		echo'</p></div><script type="text/javascript">var t = document.getElementById("message"); if (t){ t.style.display = "none"; }</script>';
-
-		flush();
+		echo '</p></div><script type="text/javascript">var t = document.getElementById("message"); if (t){ t.style.display = "none"; }</script>';
 		ob_flush();
-
+		flush();
+		
 		return true;
 	}
 
@@ -385,17 +390,19 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 	 */
 	function initURLsAndDirs() {
 
-		$this->cachedir = $this->normalize(plugin_dir_path(__FILE__).'/cache');
+		$cache = '/cache';
+
+		$this->cachedir = $this->normalize(plugin_dir_path(__FILE__).$cache);
 
 		// -------------- [Plugin URL ermitteln ] --------------
-		$this->pluginurl = plugin_dir_url(__FILE__);
+		$this->pluginurl = trim(rtrim(plugin_dir_url(__FILE__),'/'));
 
 		$elems = parse_url($this->pluginurl);
 
 		if (!isset($elems['path']))
 			return false;
 
-		$pURL = trim(rtrim($elems['path'],'/'));
+		$pURL = $elems['path'];
 
 		// -------------- [Request URL analysieren] --------------
 		
@@ -416,7 +423,7 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 				$this->pluginurl = $relpath;
 		}
 
-		$this->cacheurl = trim(rtrim($this->pluginurl,'/')).'/cache';
+		$this->cacheurl = $this->pluginurl.$cache;
 		return true;
 	}
 
@@ -447,7 +454,7 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 		} else {
 
 			// Wenn der Request Path nicht mit Slash endet, entferne den letzten Namen,
-			// da dann das Verzeichnis darüber gilt. Quasi der "dirname()"
+			// da dann das Verzeichnis darÃ¼ber gilt. Quasi der "dirname()"
 			if (substr($request_path,-1) != '/')
 				array_pop($cElems);
 
@@ -465,7 +472,7 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 
 	/**
 	 * Wandelt Backslashes einheitlich in Slashes um.
-	 * Säubert den Pfad von "/" Dubletten
+	 * SÃ¤ubert den Pfad von "/" Dubletten
 	 * @param $path string contains the pathname 
 	 */
 	function normalize($path) {
@@ -685,7 +692,7 @@ Use your ftp client, or the following command to fix it:<br />
 			switch ($plugindir) {
 				case 'wp-render-blogroll-links':
 
-					// Patch ausführen, Kommentar entfernen
+					// Patch ausfÃ¼hren, Kommentar entfernen
 					$lines[164] = "	".preg_replace('#^[/\s]+#','',$line)."\n";
 					$handle = @fopen($pluginfile,'w');
 					if ($handle !== false) {
@@ -767,14 +774,14 @@ Use your ftp client, or the following command to fix it:<br />
 			extract($urlInfo,EXTR_OVERWRITE);
 
 			// Es konnte keine Checksumme ermittelt werden
-			// also einfach die Zeile as-is übernehmen
-			if (!isset($checksum)) {
+			// also einfach die Zeile as-is Ã¼bernehmen
+			if (!isset($basename)) {
 				$newContent[] = $line;
 				continue;
 			}
 
 			// set favicon from cache or fallback to default
-			$favicon = (in_array($checksum,$cacheIcons)) ? $this->cacheurl."/$checksum" : $default_favicon;
+			$favicon = (in_array($basename,$cacheIcons)) ? $this->cacheurl."/$basename" : $default_favicon;
 
 			$token = preg_split('/<(li(\s*)|a(\s*))/',$line);
 
@@ -783,7 +790,6 @@ Use your ftp client, or the following command to fix it:<br />
 
 			$newContent[] = $line;
 		}
-
 
 		return "<!-- Begin:FaviRoll Plugin -->\n".implode("\n",$newContent)."\n<!-- End:FaviRoll Plugin -->";
 	}
