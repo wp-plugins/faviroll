@@ -19,7 +19,6 @@ The plugin fallback on a default favicon, if on the remote websites cannot be de
 1. Faviroll's outcome
 2. Faviroll configuration panel
 3. (re)build the local cache with the remote favicons
-4. Remove the double slashes in WP-Render-Blogroll.php, if you want to have the faviroll icons in the blogroll of this plugin.
 
 == Installation ==
 1. Upload the folder faviroll to the /wp-content/plugins/ directory.
