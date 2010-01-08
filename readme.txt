@@ -19,7 +19,6 @@ The plugin fallback on a default favicon, if on the remote websites cannot be de
 1. Faviroll's outcome
 2. Faviroll configuration panel
 3. (re)build the local cache with the remote favicons
-4. Remove the double slashes in WP-Render-Blogroll.php, if you want to have the faviroll icons in the blogroll of this plugin.
 
 == Installation ==
 1. Upload the folder faviroll to the /wp-content/plugins/ directory.
@@ -38,35 +37,41 @@ Explanation:
 * OTH = Other
 
 = 0.4.6 =
-* FIX: Icon Color "irritation" is fixed now.<br />
+* BUG: Icon Color "irritation" is fixed now.<br />
 Many thanks to: http://www.tom-reitz.com/2009/02/17/php-ico-to-png-conversion/
 * OPT: Users asked for WordPress MU support....Here it is.
 * OTH: Revisit default days changed from 14 to 180 days (1/2 year should be enough)
+
 = 0.4.5.1 =
 * CLN: Code "polish"
 * OPT: Try to enable/disable the availability with http://wordpress.org/extend/plugins/wp-render-blogroll-links/
+
 = 0.4.5 =
-* FIX: Parser has not recognized Blogroll-Links with additional attributes like title="...", rel="...", etc.<br />
+* BUG: Parser has not recognized Blogroll-Links with additional attributes like title="...", rel="...", etc.<br />
 Many many thanks for patient debugging support of: http://www.heiniger-net.ch/daniel
 * prepared for the new version of http://wordpress.org/extend/plugins/wp-render-blogroll-links/
 * Unfortunately this plugin needs a little patch. See Screenshot-4.
+
 = 0.4.4 =
 * CLN: Settings panel now you can find under "Links".
-* Image type recognition. Just the ICO image is converted into PNG.<br />
+* OPT: Image type recognition. Just the ICO image is converted into PNG.<br />
 All other image formats are bypass direct into the local cache.<br />
 This will maximize the usage of the foreign favicons.
+
 = 0.4.3 =
-* complete (re)design cache file handling, fallback strategies and -finally- the integration into wordpress.
-* Added styles.css to easily edit the faviroll css classes.
+* CLN: complete (re)design cache file handling, fallback strategies and -finally- the integration into wordpress.
+* OPT: Added styles.css to easily edit the faviroll css classes.
+
 = 0.4.2 =
 * CLN: little code correction
+
 = 0.4.1 =
-* FIX: in cache directory creation fixed
+* BUG: in cache directory creation fixed
+
 = 0.4 =
-* FIX: unable to create cache directory.<br />
+* BUG: unable to create cache directory.<br />
 Some user feeback reports the plugin is unable to create cache directory which anchors in plugin folder because of missing write permissions.<br />
 Now I use wordpress core function `wp_upload_dir()` to create the (persistent) cache into the "uploads" note.<br />
-Hopefully now it works all over.<br />
 
 = 0.3.2 =
 * OTH: same like version 0.3
@@ -75,9 +80,9 @@ Hopefully now it works all over.<br />
 * OTH: internal "fight" with subversion. No code changes.
 
 = 0.2 =
-* added screenshots
-* switching the transparency automatically rebuild the icon cache 
-* increase execution time to max. 5 minutes at (re)building all icons to avoid **Fatal error: Maximum execution time of xxx seconds exceeded**
+* CLN: added screenshots
+* OPT: switching the transparency automatically rebuild the icon cache 
+* BUG: increase execution time to max. 5 minutes at (re)building all icons to avoid **Fatal error: Maximum execution time of xxx seconds exceeded**
 
 = 0.1 =
 * Initial version
@@ -87,4 +92,4 @@ There is nothing to do for you
 
 == Frequently Asked Questions ==
 = Do the plugin work with WordPress MU? =
- Yes, since plugin version 0.4.6 
+ Yes, plugin is WPMU compatible up to version 0.4.6 
