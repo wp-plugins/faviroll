@@ -22,7 +22,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-// Debug only on localhost 
+// Debug only on localhost
 if ($_SERVER['HTTP_HOST'] == 'localhost') error_reporting(E_ALL);  // |E_STRICT
 
 require_once('Faviroll.class.php');
@@ -39,7 +39,7 @@ add_filter('wp_list_bookmarks', 'faviroll_list_bookmarks');
 add_filter('wp_list_bookmarks_plus', 'faviroll_list_bookmarks');
 
 /**
- * The admin-page renew the favicons after the configured time 
+ * The admin-page renew the favicons after the configured time
  */
 function faviroll_revisit() {
 
@@ -129,25 +129,16 @@ function faviroll_options(){
 
 	echo '
  <div class="wrap">
+  <div id="icon-options-general" class="icon32"><br /></div>
+  <h2>'.__('FAVIcons for blogROLL', 'faviroll').' Settings</h2>'.$faviroll->get_message($message).'<br />
+  <h4 style="display:inline;">Currently [ '.$faviroll->cacheIconsCount().' ] icons in the cache directory.</h4>
 
-  <h2 style="display:inline;">'.__('FAVIcons for blogROLL', 'faviroll').'</h2>'.$faviroll->get_message($message).'<br />
-  <h4 style="display:inline;">Currently [ '.$faviroll->cacheIconsCount().' ] icons in the cache directory.</h4> 
-
- <div style="float: right;">
- <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
- <input type="hidden" name="cmd" value="_s-xclick">
- <input type="hidden" name="hosted_button_id" value="7362367">
- <input type="image" src="https://www.paypal.com/en_GB/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="donate" title="Sollte Ihnen das Plugin gefallen, w&auml;re ich &uuml;ber eine kleine Spende sehr erfreut">
- <img alt="" border="0" src="https://www.paypal.com/de_DE/i/scr/pixel.gif" width="1" height="1">
- </form>
- </div>
-
+	 <div style="float: right;margin:10px;padding-right:50px;">
+	  <a href="http://donate.grobator.de/"><img src="https://www.paypal.com/en_GB/i/btn/btn_donate_SM.gif" border="0" alt="donate" title="Sollte Ihnen das Plugin gefallen, w&auml;re ich &uuml;ber eine kleine Spende sehr erfreut" /></a
+	 </div>
    <form id="faviroll" name="faviroll" method="post">
     <table class="form-table" summary="">
      <tr>
-      <td><strong>Settings</strong></td>
-     </tr>
-     <tr> 
       <td scope="row" valign="top">Default Favicon URL:</td>
       <td><input type="text" name="faviroll_default_favicon" size="120" value="'.$default_favicon.'" /><br />(If the favicon on the link is missing this will be shown instead.)</td>
      </tr>

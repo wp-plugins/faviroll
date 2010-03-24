@@ -1,5 +1,6 @@
 === FAVIROLL - FAVIcons for blogROLL ===
 Contributors: grobator
+Donate link: http://donate.grobator.de/
 Tags: favicons, links, icons, blogroll, bookmarks
 Requires at least: 2.7
 Tested up to: 2.9.1, (WPMU 2.8.6)
