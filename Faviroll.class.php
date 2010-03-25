@@ -83,8 +83,13 @@ class Faviroll {
 		if (empty($this->debug))
 			$init && update_option('faviroll_debug','off');
 
-		$this->debug = (get_option('faviroll_debug') == 'on');
+		// default is use faviroll/style.css.
+		$css = get_option('faviroll_use_stylesheet');
+		if (empty($css))
+			$init && update_option('faviroll_use_stylesheet','on');
 
+
+		$this->debug = (get_option('faviroll_debug') == 'on');
 	}
 
 
@@ -104,7 +109,7 @@ class Faviroll {
 	}
 
 	/**
-	 * For WordPress MU. Any MU user has a blogid, which must be included into the cache file name. 
+	 * For WordPress MU. Any MU user has a blogid, which must be included into the cache file name.
 	 */
 	function setPrefix() {
 		global $wpdb;
@@ -113,8 +118,7 @@ class Faviroll {
 			$this->prefix = $wpdb->base_prefix.$wpdb->blogid.'-';
 
 	}
-	
-	
+
 
 	/**
 	 * @return the factory default favicon URL
@@ -155,7 +159,7 @@ class Faviroll {
 			if (!$this->loadClass('Ico','Ico.class.php'))
 				return false;
 
-			// Make shure that transparency flag is set 
+			// Make shure that transparency flag is set
 			if (is_null($this->transparency))
 				$this->transparency = (get_option('faviroll_transparency') == 'on');
 
@@ -189,14 +193,14 @@ class Faviroll {
 					$image_tmp = imagecreatetruecolor(16,16);
 
 					imagecopyresampled($image_tmp, $image, 0, 0, 0, 0, 16, 16, $width, $height);
-					imagedestroy($image);					
+					imagedestroy($image);
 					$image = $image_tmp;
 				}
 			}
 
 			if (!is_null($image)) {
 				$result = imagepng($image,$icopath);
-				imagedestroy($image);					
+				imagedestroy($image);
 			}
 
 		} // icon creation end
@@ -239,7 +243,7 @@ class Faviroll {
 
 			$lk_path = ($pi_basename == $pi_filename) ? '/' : dirname($lk_path).'/';
 		}
- 
+
 
 		// cached favicons filenames are build with prefix (for WPMU) and MD5 checksum from the favicon
 		$rooturl = '';
@@ -260,7 +264,7 @@ class Faviroll {
 
 	/**
 	 * Loads the given filename if the needed class isn't defined already
-	 * @return TRUE if the PHP class is already present 
+	 * @return TRUE if the PHP class is already present
 	 */
 	function loadClass($class,$filename) {
 
@@ -307,7 +311,7 @@ class Faviroll {
 
 	/**
 	 * @param $withsize [optional] If TRUE skip all "zero size" files
-	 * @param $fullpath [optional] If TRUE full filepath is returned, instead just the basename 
+	 * @param $fullpath [optional] If TRUE full filepath is returned, instead just the basename
 	 * @return reference to List-Array with all favicon file basenames from cache directory.
 	 */
 	function &getCacheIcons($withsize=true,$fullpath=false) {
@@ -315,7 +319,7 @@ class Faviroll {
 		$result = array();
 
 		// MD5 Strings are always 32 characters f.e. cc33ac77c986e91fb30604dd516a61c7
-		$pattern = $this->cachedir.'/'.$this->prefix.'????????????????????????????????'; 
+		$pattern = $this->cachedir.'/'.$this->prefix.'????????????????????????????????';
 		$items = @glob($pattern);
 		if ($items === false)
 			return $result;
@@ -358,7 +362,7 @@ class Faviroll {
 
 		if ($offsetFromNow < $this->lastcheck)
 			return false;
-			
+
 		// Max. Laufzeit auf 5 Min. setzen
 		@ini_set('max_execution_time',300);
 
@@ -369,8 +373,8 @@ This may be take some time... stay tuned, please!<br />
 <br />
 Cache directory = '.$this->cachedir.'<br /></b>';
 
-			
-		# ---------- next stage 
+
+		# ---------- next stage
 		foreach(get_bookmarks() as $link) {
 			$this->putIconIntoCache($link,true);
 		}
@@ -380,7 +384,7 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 		echo '</p></div><script type="text/javascript">var t = document.getElementById("message"); if (t){ t.style.display = "none"; }</script>';
 		ob_flush();
 		flush();
-		
+
 		return true;
 	}
 
@@ -405,7 +409,7 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 		$pURL = $elems['path'];
 
 		// -------------- [Request URL analysieren] --------------
-		
+
 		if (!isset($_SERVER['REQUEST_URI']))
 			return false;
 
@@ -473,7 +477,7 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 	/**
 	 * Wandelt Backslashes einheitlich in Slashes um.
 	 * Säubert den Pfad von "/" Dubletten
-	 * @param $path string contains the pathname 
+	 * @param $path string contains the pathname
 	 */
 	function normalize($path) {
 		$result = str_replace('\\','/',$path);
@@ -491,11 +495,11 @@ Cache directory = '.$this->cachedir.'<br /></b>';
 
 	/**
 	 * Check write permissions on cache directory.
-	 * @return error message if cache directory is not writable, or the string is given into method 
+	 * @return error message if cache directory is not writable, or the string is given into method
 	 */
 	function get_message($othermsg=null) {
 
-		// non-admin 
+		// non-admin
 		if (!is_admin() || $this->can_write_cache())
 			return $othermsg;
 
@@ -519,7 +523,7 @@ Use your ftp client, or the following command to fix it:<br />
 	/**
 	 * from http://de3.php.net/is_writable
 	 * Since looks like the Windows ACLs bug "wont fix" (see http://bugs.php.net/bug.php?id=27609) I propose this alternative function:
-	 * For directory check $path must end with a slash 
+	 * For directory check $path must end with a slash
 	 */
 	function is__writable($path) {
 		if ($path{strlen($path)-1}=='/')
@@ -544,7 +548,7 @@ Use your ftp client, or the following command to fix it:<br />
 
 	/**
 	 * Detect the URL to the favicon
-	 * @param $i_url Website URL which (hopefully) contains the favicon href 
+	 * @param $i_url Website URL which (hopefully) contains the favicon href
 	 */
 	function locateIcon($i_url) {
 
@@ -651,7 +655,7 @@ Use your ftp client, or the following command to fix it:<br />
 	 */
 	function patchPlugin($plugindir,$activate=false) {
 
-		$result = null;	
+		$result = null;
 
 		foreach (get_plugins() as $path => $data) {
 			if (strpos($path,$plugindir) === 0) {
@@ -685,7 +689,7 @@ Use your ftp client, or the following command to fix it:<br />
 				break;
 			default:
 				break;
-		}			
+		}
 
 		if ($activate) {
 

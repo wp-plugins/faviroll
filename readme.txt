@@ -4,7 +4,7 @@ Donate link: http://donate.grobator.de/
 Tags: favicons, links, icons, blogroll, bookmarks
 Requires at least: 2.7
 Tested up to: 2.9.1, (WPMU 2.8.6)
-Stable tag: 0.4.6
+Stable tag: 0.4.7
 
 Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers (f.e. IE).
 
@@ -36,6 +36,9 @@ Explanation:
 * OPT = Optimization
 * CLN = Cleanup/Refactoring
 * OTH = Other
+
+= 0.4.7 =
+* FEA: Options has a new checkbox for disabling faviroll/style.css  (Request from Dixie)
 
 = 0.4.6 =
 * BUG: Icon Color "irritation" is fixed now.<br />

@@ -4,7 +4,7 @@ Plugin Name: FAVIROLL - FAVIcons for blogROLL
 Plugin URI: http://www.grobator.de/wordpress-stuff/plugins/faviroll
 Description: Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers/operating systems. <strong><a href="link-manager.php?page=faviroll.php">For Settings jump to: Links &raquo; Faviroll</a></strong>
 Author: grobator
-Version:  0.4.6
+Version:  0.4.7
 Author URI:  http://www.grobator.de/
 ----------------------------------------------------------------------------------------
 This program is free software; you can redistribute it and/or modify
@@ -96,9 +96,10 @@ function faviroll_options(){
 			$defico = trim($_REQUEST['faviroll_default_favicon']);
 			update_option('faviroll_default_favicon', (empty($defico) ? $faviroll->getFavirollDefaultIcon() : $defico));
 
-			update_option('faviroll_revisit'     , (int) trim($_REQUEST['faviroll_revisit']));
-			update_option('faviroll_transparency', (isset($_REQUEST['faviroll_transparency']) ? 'on' : 'off') );
-			update_option('faviroll_debug'       , (isset($_REQUEST['faviroll_debug']) ? 'on' : 'off') );
+			update_option('faviroll_revisit'       , (int) trim($_REQUEST['faviroll_revisit']));
+			update_option('faviroll_transparency'  , (isset($_REQUEST['faviroll_transparency']) ? 'on' : 'off') );
+			update_option('faviroll_debug'         , (isset($_REQUEST['faviroll_debug']) ? 'on' : 'off') );
+			update_option('faviroll_use_stylesheet', (isset($_REQUEST['faviroll_use_stylesheet']) ? 'on' : 'off') );
 
 			$message = 'Settings updated';
 		}
@@ -112,6 +113,7 @@ function faviroll_options(){
 
 	$is_transparency = (get_option('faviroll_transparency') == 'on');
 	$is_debugMode    = (get_option('faviroll_debug') == 'on');
+	$use_stylesheet  = (get_option('faviroll_use_stylesheet') == 'on');
 
 	if (!$removeSettings) {
 
@@ -139,40 +141,44 @@ function faviroll_options(){
    <form id="faviroll" name="faviroll" method="post">
     <table class="form-table" summary="">
      <tr>
-      <td scope="row" valign="top">Default Favicon URL:</td>
-      <td><input type="text" name="faviroll_default_favicon" size="120" value="'.$default_favicon.'" /><br />(If the favicon on the link is missing this will be shown instead.)</td>
+      <td width="150">Default Favicon URL:</td>
+      <td><input type="text" name="faviroll_default_favicon" size="80" value="'.$default_favicon.'" /><br />(If the favicon on the link is missing this will be shown instead.)</td>
      </tr>
      <tr>
-      <td scope="row">Favions revisit after:</td>
+      <td>Favions revisit after:</td>
       <td><input type="text" name="faviroll_revisit" size="4" value="'.$revisit.'" /> days</td>
      </tr>
      <tr>
-      <td scope="row">Use transparent background:</td>
+      <td>make Favicon<br />background transparent:</td>
       <td><input type="checkbox" name="faviroll_transparency" value="on"'.($is_transparency ? ' checked="checked"' : null).' /></td>
      </tr>
      <tr>
-      <td scope="row">&nbsp;</td>
-      <td><a href="plugin-editor.php?file=faviroll/style.css&plugin=faviroll/faviroll.php" title="Edit the faviroll css-styles">Edit faviroll stylesheet</a></td>
+      <td>Use faviroll/style.css:</td>
+      <td>
+        <input type="checkbox" name="faviroll_use_stylesheet" value="on"'.($use_stylesheet ? ' checked="checked"' : null).' />
+         &nbsp;&nbsp;&nbsp;
+        <label for="faviroll_use_stylesheet"><a href="plugin-editor.php?file=faviroll/style.css&plugin=faviroll/faviroll.php" title="Edit the faviroll css-styles">Edit faviroll stylesheet</a></label>
+      </td>
      </tr>
-     <tr>
-      <td colspan="2" width="98%"><hr size="1" /></td>
-     </tr>
+	   <tr>
+	      <td colspan="2" style="line-height:5px;padding:0px;"><hr size="1" width="90%" /></td>
+	   </tr>
      <tr>
       <td><strong>Actions</strong></td>
      </tr>
      <tr>
-      <td scope="row">(re)build FavIcons now:</td>
+      <td>(re)build FavIcons now:</td>
       <td><input type="checkbox" name="faviroll_renew_icons" value="true"'.(($faviroll->cacheIconsCount() == 0) ? ' checked="checked"' : null).' /></td>
      </tr>
      <tr>
-      <td scope="row" title="This will remove plugin settings from database and drop the favicon cache">Remove settings:</td>
+      <td title="This will remove plugin settings from database and drop the favicon cache">Remove settings:</td>
       <td><input type="checkbox" name="faviroll_remove_settings" value="true" />
      </tr>
 ';
 /*
 				<tr>
-					<td scope="row" title="Write debug informations as comments into the HTML code">Debug mode:</td>
-			    	<td><input type="checkbox" name="faviroll_debug" value="true" '.($is_debugMode ? ' checked="checked"' : null).' /> &nbsp; ( just for Developers, normally switch off )
+					<td title="Write debug informations as comments into the HTML code">Debug mode:</td>
+			    <td><input type="checkbox" name="faviroll_debug" value="true" '.($is_debugMode ? ' checked="checked"' : null).' /> &nbsp; ( just for Developers, normally switch off )
 				</tr>
 */
 	echo '     <tr>
@@ -197,15 +203,15 @@ function faviroll_menu() {
 add_action('admin_menu', 'faviroll_menu');
 
 
-
 /**
- * Register Enqueue CSS
+ * Register Enqueue CSS, if option is activated in Faviroll-Settings
  */
-function faviroll_enqueue_scripts() {
-	wp_enqueue_style('faviroll', WP_PLUGIN_URL.'/faviroll/style.css', false, false, 'all');
+if (get_option('faviroll_use_stylesheet') == 'on') {
+	function faviroll_enqueue_scripts() {
+		wp_enqueue_style('faviroll', WP_PLUGIN_URL.'/faviroll/style.css', false, false, 'all');
+	}
+	add_action('wp_enqueue_scripts', 'faviroll_enqueue_scripts');
 }
-add_action('wp_enqueue_scripts', 'faviroll_enqueue_scripts');
-
 
 /**
  * Actions on plugin activation
