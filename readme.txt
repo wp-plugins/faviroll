@@ -4,7 +4,7 @@ Donate link: http://donate.grobator.de/
 Tags: favicons, links, icons, blogroll, bookmarks
 Requires at least: 2.7
 Tested up to: 2.9.1, (WPMU 2.8.6)
-Stable tag: 0.4.7
+Stable tag: 0.4.8
 
 Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers (f.e. IE).
 
@@ -17,9 +17,9 @@ In a configured interval of dates will the favicon cache be refreshed, because t
 The plugin fallback on a default favicon, if on the remote websites cannot be detected a valid favicon. The default icon can be configured.
 
 == Screenshots ==
-1. Faviroll's outcome
-2. Faviroll configuration panel
-3. (re)build the local cache with the remote favicons
+1. Two Blogrolls examples with Faviroll icons
+2. Configuration panel
+3. Faviroll is on the run to (re)build the icon cache
 
 == Installation ==
 1. Upload the folder faviroll to the /wp-content/plugins/ directory.
@@ -36,6 +36,15 @@ Explanation:
 * OPT = Optimization
 * CLN = Cleanup/Refactoring
 * OTH = Other
+
+= 0.4.8 - Codename: "Dixie's fix" =
+* CLN: Code Refactoring: Code structure completely rewritten, a lot of bugfixes and runtime optimation.<br />
+* FEA: Implementation of Windows BMP processing. Some site using this image format which can't process by PHPs GD-Library.<br />
+Until now these proprietary formats was (non optimal) passed by Faviroll.
+* BUG: Some Sites deliver Favions larger 16x16 pixels and proprietary formats wasn't shrinked to 16x16.<br />(Issue Request from Dixie. Thanks for feedback, "Dix").<br />
+I've found [http://phpthumb.sourceforge.net/](http://phpthumb.sourceforge.net/) to solve the issue.<br />
+This superb library is able to convert Windows BMP icons up to 32 Bit to [GD image](http://php.net/manual/en/ref.image.php) which Faviroll needs.<br />
+Conclusion: Favicon handling is more complex I thought at the beginning, but I don't give up.
 
 = 0.4.7 =
 * FEA: Options has a new checkbox for disabling faviroll/style.css  (Request from Dixie)

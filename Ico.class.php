@@ -1,7 +1,6 @@
 <?php
 /**
  * class.ico.php
- *
  * @(#) $Header: /home/jeph/repository/classes/ico/class.ico.php,v 0.1 2005/06/08 15:12:24 jeph Exp $
  **/
 
@@ -26,6 +25,19 @@ class Ico {
 	 * Ico::rawdata
 	 * contains the original data, if image format != "ico".
 	 */
+	var $rawdata = false;
+
+	/**
+	 * Ico::imagetype
+	 * Will set to runtime if data format != "ico".
+	 */
+	var $imagetype = false;
+
+	/**
+	 * Ico::ortherformatimage
+	 * Will set to runtime if data format != "ico".
+	 */
+	var $otherformatimage = false;
 
 	/**
 	 * Ico::bgcolor
@@ -54,9 +66,9 @@ class Ico {
 	 * @return              void
 	 **/
 	function Ico($path=null,$transparency=false) {
-		if (!is_null($path)) {
+		if (!is_null($path))
 			$this->LoadFile($path);
-		}
+
 		$this->SetBackgroundTransparent($transparency);
 	}
 
@@ -94,9 +106,8 @@ class Ico {
 	function LoadData($data) {
 		$this->formats = array();
 
-#echo $this->detectImageFormat($data);
-
-		switch ($this->detectImageFormat($data)) {
+		$type = $this->detectImageType($data);
+		switch ($type) {
 			case 'txt':
 			case false:
 				return false;
@@ -104,9 +115,16 @@ class Ico {
 
 			case 'ico':
 				break;
-			
+
 			default:
-				$this->rawdata = $data;
+				$this->imagetype = $type;
+				$image = $this->getOtherFormatImage($data,$type);
+				if ($image === false) {
+					$this->rawdata = $data;
+				} else {
+					$this->otherformatimage = $image;
+				}
+
 				return true;
 				break;
 		}
@@ -309,10 +327,10 @@ class Ico {
 							  // Thanks to: http://www.tom-reitz.com/2009/02/17/php-ico-to-png-conversion/
 							  //
 								$c[$i] = $this->AllocateColor($im, $this->formats[$index]['colors'][$i]['blue'],
-    																						     $this->formats[$index]['colors'][$i]['green'],
-																						         $this->formats[$index]['colors'][$i]['red'],
-																						         round($this->formats[$index]['colors'][$i]['reserved'] / 255 * 127));
-							
+    																					     $this->formats[$index]['colors'][$i]['green'],
+																					         $this->formats[$index]['colors'][$i]['red'],
+																					         round($this->formats[$index]['colors'][$i]['reserved'] / 255 * 127));
+
 							}
 					}
 
@@ -479,7 +497,7 @@ class Ico {
 	/**
 	 * @return the image type as string or FALSE if $data is empty.
 	 */
-	function detectImageFormat(&$data) {
+	function detectImageType(&$data) {
 
 		if ($this->is_text($data)) {
 			return 'txt';
@@ -495,7 +513,7 @@ class Ico {
 			return 'tif';
 		} elseif ($this->is_bmp($data)) {
 			return 'bmp';
-		} 
+		}
 
 		return false;
 
@@ -521,7 +539,7 @@ class Ico {
 	}
 
 	/**
-	 * @see http://www.onicos.com/staff/iz/formats/gif.html 
+	 * @see http://www.onicos.com/staff/iz/formats/gif.html
 	 * @see http://de.wikipedia.org/wiki/Magische_Zahl_%28Informatik%29#Magische_Zahlen_zur_Kennzeichnung_von_Dateitypen
 	 * @TODO: documentation
 	 */
@@ -563,7 +581,7 @@ class Ico {
 
 	/**
 	 * @param &$data - the image binary data
-	 * 
+	 *
 	 * @see http://en.wikipedia.org/wiki/ICO_%28file_format%29#Header
 	 * Offset# 	Size 	Purpose
 	 * 0        2     reserved. should always be 0
@@ -604,6 +622,29 @@ class Ico {
 			return false;
 
 		return (substr($data,0,2) == 'BM');
+	}
+
+	/**
+	 * Try to import binary string to an image object
+	 * @return image object if data could be successfully imported or FALSE
+	 */
+	function getOtherFormatImage(&$data,$type) {
+
+		// Zuerst versuchen mit der Standard PHP Methode das Image aus dem binary string zu erzeugen
+		$image = @imagecreatefromstring(&$data);
+
+		// schlägt dieses fehl, versuche es mit dem BMP-Import
+		if ($image === false) {
+			if ($type == 'bmp') {
+				if (!class_exists('Bmp'))
+					require_once('PHPBmp.class.php');
+
+					$bmp = new PHPBmp();
+					$image = $bmp->bmp2gd($data);
+			}
+		}
+
+		return $image;
 	}
 
 }
