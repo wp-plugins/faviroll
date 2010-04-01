@@ -38,7 +38,7 @@ Explanation:
 * OTH = Other
 
 = 0.4.8.1 =
-* BUG: Uups, there was a little code mistake. I've made one test too less, "mea cupla". ;-) 
+* BUG: Ooops, I've overlooked a little error in my code, made one test too less, "mea cupla". ;-) 
 
 = 0.4.8 - Codename: "Dixie's fix" =
 * CLN: Code Refactoring: Code structure completely rewritten, a lot of bugfixes and runtime optimation.<br />
