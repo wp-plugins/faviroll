@@ -3,8 +3,8 @@ Contributors: grobator
 Donate link: http://donate.grobator.de/
 Tags: favicons, links, icons, blogroll, bookmarks
 Requires at least: 2.7
-Tested up to: 2.9.1, (WPMU 2.8.6)
-Stable tag: 0.4.8.1
+Tested up to: 3.0.3
+Stable tag: 0.4.8.2
 
 Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers (f.e. IE).
 
@@ -36,6 +36,9 @@ Explanation:
 * OPT = Optimization
 * CLN = Cleanup/Refactoring
 * OTH = Other
+
+= 0.4.8.2 =
+* OPT: Code maintenance for WP 3.x
 
 = 0.4.8.1 =
 * BUG: Ooops, I've overlooked a little error in my code, made one test too less, "mea cupla". ;-) 
@@ -76,7 +79,7 @@ This will maximize the usage of the foreign favicons.
 
 = 0.4.3 =
 * CLN: complete (re)design cache file handling, fallback strategies and -finally- the integration into wordpress.
-* OPT: Added styles.css to easily edit the faviroll css classes.
+* OPT: Added style.css to easily edit the faviroll css classes.
 
 = 0.4.2 =
 * CLN: little code correction

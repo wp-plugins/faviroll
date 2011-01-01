@@ -4,7 +4,7 @@
  Plugin URI: http://www.grobator.de/wordpress-stuff/plugins/faviroll
  Description: Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers/operating systems.
  Author: grobator
- Version:  0.4.8.1
+ Version:  0.4.8.2
  Author URI:  http://www.grobator.de/
  ----------------------------------------------------------------------------------------
  This program is free software; you can redistribute it and/or modify
@@ -60,7 +60,7 @@ if (is_admin()) {
 	 * Register Faviroll menu in general options menu
 	 */
 	function faviroll_menu() {
-		add_submenu_page('link-manager.php', __('Faviroll', 'faviroll'), __('Faviroll', 'faviroll'), 8, basename(__FILE__), 'faviroll_settings');
+		add_submenu_page('link-manager.php', __('Faviroll', 'faviroll'), __('Faviroll', 'faviroll'), 'manage_options', basename(__FILE__), 'faviroll_settings');
 	}
 	add_action('admin_menu', 'faviroll_menu');
 
