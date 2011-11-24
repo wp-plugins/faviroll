@@ -1,0 +1,97 @@
+/*
+Faviroll backend CSS file
+Author: andurban.de
+Version: latest
+*/
+
+
+.visible {visibility:visible; padding-left:10px;}
+.hidden  {visibility:hidden;}
+
+.pad {
+	padding:5px 15px 5px 15px;
+}
+
+/* FaviRoll Option Page Bookmark Table */
+.favi-roll-table {
+  margin: 5px 0px 5px 5px;
+}
+
+.favi-roll-table th {
+ padding: 6px;
+ text-align:left;
+ font-weight:bold;
+ font-size:1.1em;
+ line-height:20px;
+ height: 20px;
+ nowrap:nowrap;
+}
+
+.favi-roll-table th#_reload {
+ padding-left:28px;
+ cursor:pointer;
+ background:url(../img/reload.png) 6px center no-repeat;
+}
+.favi-roll-table th#_reload:hover {
+ background:url(../img/reload-hover.png) 6px center no-repeat;
+}
+
+.favi-roll-table td.actions {
+ padding:0px;
+ width:480px;
+}
+.favi-roll-table td.notice {
+ line-height:30px;
+ height:52px;
+ background:url(../img/green-arrow.png) 8px bottom no-repeat;
+}
+
+.favi-roll-table td img.icon {
+ margin:-4px 8px;
+}
+
+.favi-roll-table td.setcolumn {
+ cursor:pointer;
+ width:70px;
+}
+
+.favi-roll-table tr:nth-child(even) {
+ background: #d8e4e5;
+}
+.favi-roll-table td.link {
+ text-align:left;
+ padding-left:6px;
+}
+
+.favi-roll-table td.link strong {
+ display:block;
+ line-height:22px;
+ height:22px;
+ padding-left:20px;
+ background:0px center no-repeat;
+}
+
+.favi-roll-table td input.radio {
+ margin:0px auto;
+}
+
+.favi-roll-table td input.button {
+ padding:1px 5px 1px 5px;
+ margin:4px 4px 4px 4px;
+ border:none;
+}
+
+#initbutton {
+ font-size:2em;
+ padding:10px;
+}
+
+.favi-roll-table td.icon{
+ background:url(../img/dumpster.png)  14px center no-repeat;
+ font-weight:bold;
+ height:70px;
+ line-height:70px;
+ margin-bottom:14px;
+ text-align:left;
+ padding-left:70px;
+}

@@ -1,7 +1,0 @@
-/* Make shure that list-style is disabled. Important if you use "WP Render Blogroll Links" */
-li.faviroll {
- list-style:none !important;
-}
-
-/* Here you may anhanced style the blogroll-links */
-li.a.faviroll {}

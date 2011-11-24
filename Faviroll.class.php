@@ -1,10 +1,10 @@
 <?php
 /*
-Faviroll - Main Class for the wordpress plugin "Faviroll"
-Author: grobator
+Faviroll - Widget Class
+Author: andurban.de
 Version: latest
 ----------------------------------------------------------------------------------------
-Copyright 2009-2010 grobator  (email: http://www.grobator.de/kontakt)
+Copyright 2009-2011 andurban.de  (email: http://www.andurban.de/kontakt)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,44 +19,81 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+
+TODO:
++ wp-nonce ajax
+
 */
 
-class Faviroll {
+require_once('FavirollWorker.class.php');
+
+class Faviroll extends WP_Widget {
 
 	// Members
-	var $prefix = '';
-	var $cachedir = null;
+	var $worker = null;
 	var $cacheurl = null;
 	var $pluginurl = null;
 	var $opts = array();
 
 
 	/**
-	 * PHP4 Constructor. Wrapper for __construct()
-	 */
-	function Faviroll() {
-		$args = func_get_args();
-		call_user_func_array(array(&$this, '__construct'), $args);
-	}
-
-
-	/**
-	 * PHP5 Constructor
+	 * Constructor
 	 */
 	function __construct() {
-		$this->setPrefix();
-		$this->initURLsAndDirs();
 
+		$this->worker = new FavirollWorker($this->initPrefix());
+		$this->initURLsAndDirs();
+		
 		$this->opts = get_option('faviroll');
 		if (!$this->opts)
 			$this->opts = array();
 
+		parent::__construct(false, $name = 'Faviroll', $this->opts);
+	}
+
+
+	/**
+	 * @return initialize member variables for dirnames and urls.
+	 */
+	function initURLsAndDirs() {
+
+		// -------------- [Plugin URL ermitteln ] --------------
+		$this->pluginurl = trim(rtrim(plugin_dir_url(__FILE__),'/')).'/';
+
+		$elems = parse_url($this->pluginurl);
+
+		if (!isset($elems['path']))
+			return false;
+
+		$pURL = $elems['path'];
+
+		// -------------- [Request URL analysieren] --------------
+
+		if (!isset($_SERVER['REQUEST_URI']))
+			return false;
+
+		$request = parse_url($_SERVER['REQUEST_URI']);
+		if (!isset($request['path']))
+			return false;
+
+		$cURL = trim(rtrim($request['path'],'/'));
+
+		// ------------- [try to shorten url paths on user sites] -------------
+		if (!is_admin()) {
+			$relpath = $this->getRelativePluginPath($cURL,$pURL,$request['path']);
+			if ($relpath)
+				$this->pluginurl = $relpath;
+		}
+
+		$this->cacheurl = $this->pluginurl.basename($this->getCacheDir());
+
+		return true;
 	}
 
 
 	/**
 	 * Get an option value
-	 * Notice: setopt() is in FavirollAdmin.class
 	 * @return option value, or NULL
 	 */
 	function getopt($k) {
@@ -70,106 +107,141 @@ class Faviroll {
 	 */
 	function apply($content) {
 
-		// get list of cached icons
-		$cacheIcons = $this->getCacheIcons();
-
+		$nlines = array();
+		
 		// split bookmarks in lines
-		$lines = explode("\n",$content);
+		$olines = explode("\n",$content);
 
-		$default_favicon =  $this->getopt('default_favicon');
-		$newContent = array();
-
+		$favicons = $this->getFaviconsByURL();
+		
 		// analyze bookmark lines
-		foreach($lines as $line) {
+		foreach($olines as $line) {
 
 			$line = trim($line);
 
+			// overhead stuff pass thru
 			if (!(bool) @preg_match('/a[\s]+[^>]*?href[\s]?=[\s\"\']+(.*?)[\"\']+.*?>([^<]+|.*?)?<\/a>/i', $line, $matches)) {
-				// overhead stuff
-				$newContent[] = $line;
+				$nline[] = $line;
 				continue;
 			}
 
+			// overhead stuff pass thru
 			if (count($matches) < 3) {
-				// overhead stuff
-				$newContent[] = $line;
+				$nline[] = $line;
 				continue;
 			}
 
-			$urlInfo = $this->getURLinfo($matches[1]);
-			extract($urlInfo,EXTR_OVERWRITE);
+			$link_url = $matches[1];
+			$key = html_entity_decode($link_url);
+			$favicon = (isset($favicons[$key])) ? $favicons[$key] : null;
 
-			// Es konnte keine Checksumme ermittelt werden
-			// also einfach die Zeile as-is übernehmen
-			if (!isset($basename)) {
-				$newContent[] = $line;
-				continue;
+			 $token = preg_split('/<(li(\s*)|a(\s*))/',$line);
+
+			if (count($token) == 3) {
+				// evtl. vorhandene <IMG>-Tags entfernen
+				$token = strip_tags($token[2]);
+				$line = '<li class="faviroll"><a class="faviroll" style="background:url('.$favicon.') 0px center no-repeat;" '.$token.'</a></li>';
 			}
 
-			// set favicon from cache or fallback to default
-			$favicon = (in_array($basename,$cacheIcons)) ? $this->cacheurl."/$basename" : $default_favicon;
-
-			$token = preg_split('/<(li(\s*)|a(\s*))/',$line);
-
-			if (count($token) == 3)
-				$line = '<li class="faviroll"><a style="padding-left:18px; background:url('.$favicon.') 0px center no-repeat;" class="faviroll" '.$token[2];
-
-			$newContent[] = $line;
+			$nline[] = $line;
 		}
 
-		return "<!-- Begin:FaviRoll-->\n".implode("\n",$newContent)."\n<!-- End:FaviRoll-->";
+		return "<!-- Begin:FaviRoll-->\n".implode("\n",$nline)."\n<!-- End:FaviRoll-->";
 	}
 
 
 	/**
-	 * For WordPress MU. Any MU user has a blogid, which must be included into the cache file name.
+	 * For WordPress MU. Any MU user has a separate blogid, which must be included into the cache file name.
 	 */
-	function setPrefix() {
+	function initPrefix() {
 		global $wpdb;
 
+		$result = '';
+
 		if (isset($wpdb->base_prefix) && isset($wpdb->blogid))
-			$this->prefix = $wpdb->base_prefix.$wpdb->blogid.'-';
-	}
-
-
-	/**
-	 * @return reference to Hash-Array with the keys: [basename], [rooturl]
-	 */
-	function &getURLinfo($bookmark) {
-
-		$result = array();
-
-		$link = parse_url($bookmark);
-		extract($link,EXTR_PREFIX_ALL|EXTR_OVERWRITE|EXTR_REFS,'lk');
-
-		if (!isset($lk_path))
-			$lk_path = '/';
-
-		if ($lk_path != '/') {
-			$pathinfo = pathinfo($lk_path);
-			extract($pathinfo,EXTR_PREFIX_ALL|EXTR_OVERWRITE|EXTR_REFS,'pi');
-
-			$lk_path = ($pi_basename == $pi_filename) ? '/' : dirname($lk_path).'/';
-		}
-
-
-		// cached favicons filenames are build with prefix (for WPMU) and MD5 checksum from the favicon
-		$rooturl = '';
-		if (isset($lk_scheme))
-			$rooturl.= "${lk_scheme}://";
-		if (isset($lk_host))
-			$rooturl.= $lk_host;
-		if (isset($lk_path))
-			$rooturl.= $lk_path;
-
-		// md5 cecksum of root-URL is name of favicon cache file
-		$result['basename'] = $this->prefix.md5(strtolower($rooturl));
-		$result['rooturl'] = $rooturl;
+			$result = $wpdb->base_prefix.$wpdb->blogid.'-';
 
 		return $result;
 	}
 
 
+	/**
+	 * ®return cache url
+	 */
+	function getCacheURL() {
+		return $this->cacheurl;
+	}
+
+
+	/**
+	 * @return prefix fo a cache file name.
+	 */
+	function getCacheFilePrefix($customColumn=false) {
+		return $this->worker->getCacheFilePrefix($customColumn);
+	}
+	
+	
+	/**
+	 * @return server path of icon cache directory
+	 */
+	function getCacheDir() {
+		return $this->worker->getCacheDir();
+	}
+
+
+	/**
+	 * @see
+	 */
+	function getDefaultBasename() {
+		return $this->getopt('default-icon');
+	}
+
+
+	/**
+	 * @see
+	 */
+	function getFactoryBasename() {
+		return $this->worker->getFactoryBasename();
+	}
+
+
+	/**
+	 * @see 
+	 */
+	function putIconIntoCache($bookmark) {
+		return $this->worker->putIconIntoCache($bookmark);
+	}
+	
+	
+	/**
+	 * @see 
+	 */
+	function &getURLinfo($bookmark,$customColumn=false) {
+			return $this->worker->getURLinfo($bookmark,$customColumn);
+	}
+
+
+	/**
+	 * get array with the default icon at first following by get_bookmarks()
+	 * @see http://codex.wordpress.org/Template_Tags/get_bookmarks
+	 */
+	function &getBookmarks() {
+
+		// set "virtual" default link on the top of the table
+		$default = new stdClass();
+		$default->link_id = 0;
+		$default->basename = $this->getDefaultBasename();
+		$default->link_url = $default->basename;
+		$default->link_image = $default->basename;
+		$default->link_name ='Default Icon';
+		$default->factory_image	= $this->getFactoryBasename();
+
+		// append the list of bookmarks after default icon
+		$result = array_merge(array($default), get_bookmarks() );
+		
+		return $result;
+	}
+	
 	/**
 	 * @param $withsize [optional] If TRUE skip all "zero size" files
 	 * @param $fullpath [optional] If TRUE full filepath is returned, instead just the basename
@@ -181,8 +253,10 @@ class Faviroll {
 
 		$zeroFilesOnly = ($withsize === 0);
 
-		// MD5 Strings are always 32 characters f.e. cc33ac77c986e91fb30604dd516a61c7
-		$pattern = $this->cachedir.'/'.$this->prefix.'????????????????????????????????';
+		// MD5-Strings are always 32 characters f.e. cc33ac77c986e91fb30604dd516a61c7
+		// because of the flexible part of custom-columns there is a "*" before the 32 questions marks
+		$pattern = $this->getCacheDir().'/'.$this->getCacheFilePrefix('*').'????????????????????????????????';
+
 		$items = @glob($pattern);
 		if ($items === false)
 			return $result;
@@ -214,54 +288,47 @@ class Faviroll {
 
 
 	/**
+	 * 
+	 */
+	function &getFaviconsByURL() {
+		
+		$result = array();
+
+		$bms = $this->getBookmarks();
+		$default = array_shift($bms);
+
+		$cacheIcons = $this->getCacheIcons();
+		$cacheurl = $this->getCacheURL();
+
+		foreach ($bms as $bm) {
+
+			$customColumn=false;
+			extract($this->getURLinfo($bm->link_url, $customColumn), EXTR_OVERWRITE);
+			
+			if (!(in_array($basename,$cacheIcons)))
+				$basename = $default->basename;
+			
+			$link_image = strstr($bm->link_image,'faviroll-'); // alles links vom String "faviroll-" entfernen
+			if (empty($link_image) || $link_image === false) {
+				$favicon = $basename;
+			} else {
+				$favicon = $link_image;
+			}
+
+			$key = html_entity_decode($bm->link_url);
+			$result[$key] = "$cacheurl/$favicon";
+		}
+
+		return $result;
+	}
+	
+
+	/**
 	 * @param $withsize [optional] If TRUE skip all "zero size" files
 	 * @return The count of icons in cache directory.
 	 */
 	function cacheIconsCount($withsize=true) {
 		return count($this->getCacheIcons($withsize));
-	}
-
-
-	/**
-	 * @return initialize member variables for dirnames and urls.
-	 */
-	function initURLsAndDirs() {
-
-		$cache = '/cache';
-
-		$this->cachedir = $this->normalize(plugin_dir_path(__FILE__).$cache);
-
-		// -------------- [Plugin URL ermitteln ] --------------
-		$this->pluginurl = trim(rtrim(plugin_dir_url(__FILE__),'/'));
-
-		$elems = parse_url($this->pluginurl);
-
-		if (!isset($elems['path']))
-			return false;
-
-		$pURL = $elems['path'];
-
-		// -------------- [Request URL analysieren] --------------
-
-		if (!isset($_SERVER['REQUEST_URI']))
-			return false;
-
-		$request = parse_url($_SERVER['REQUEST_URI']);
-		if (!isset($request['path']))
-			return false;
-
-
-		$cURL = trim(rtrim($request['path'],'/'));
-
-		// ------------- [try to shorten url paths on user sites] -------------
-		if (!is_admin()) {
-			$relpath = $this->getRelativePluginPath($cURL,$pURL,$request['path']);
-			if ($relpath)
-				$this->pluginurl = $relpath;
-		}
-
-		$this->cacheurl = $this->pluginurl.$cache;
-		return true;
 	}
 
 
@@ -286,7 +353,7 @@ class Faviroll {
 		}
 
 		if (count($cElems) == 0) {
-			$result = join('/',array_merge(array('.'),$pElems));
+			$result = implode('/',array_merge(array('.'),$pElems));
 		} else {
 
 			// Wenn der Request Path nicht mit Slash endet, entferne den letzten Namen,
@@ -299,29 +366,10 @@ class Faviroll {
 				$relpath[] = '..';
 			}
 
-			$result = join('/',array_merge($relpath,$pElems));
+			$result = implode('/',array_merge($relpath,$pElems));
 		}
 
 		return $result;
-	}
-
-
-	/**
-	 * Wandelt Backslashes einheitlich in Slashes um.
-	 * Säubert den Pfad von "/" Dubletten
-	 * @param $path string contains the pathname
-	 */
-	function normalize($path) {
-		$result = str_replace('\\','/',$path);
-
-		// Alle Slashes, die mehr als 1x vorkommen,
-		// zu einem "zusammendampfen".
-		//
-		$result = preg_replace('-/{2,}-','/',$result);
-
-		// evtl. endende Slashes entfernen.
-		//
-		return rtrim($result,'/');
 	}
 
 

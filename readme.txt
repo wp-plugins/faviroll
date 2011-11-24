@@ -1,32 +1,31 @@
 === FAVIROLL - FAVIcons for blogROLL ===
-Contributors: grobator
-Donate link: http://donate.grobator.de/
+Contributors: andurban
+Donate link: http://donate.andurban.de/
 Tags: favicons, links, icons, blogroll, bookmarks
-Requires at least: 2.7
-Tested up to: 3.0.3
-Stable tag: 0.4.8.2
-
-Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers (f.e. IE).
+Requires at least: 3.x
+Tested up to: 3.2.1
+Stable tag: 0.5
 
 == Description ==
 
-The plugin converts the favicon.ico from the blogroll links in PNG Image format and save the converted image locally. The conversion process works just on the admin-page, visitors don't have to waste time to wait for favicons from remote websites. If a blogroll entry was added or modified this single Link will be updated.
+This plugin convert the favicon.ico from the blogroll sites into PNG images and save this in a local cache file. The conversion process works just on the admin-page, visitors don't have to waste time to wait for favicons from remote websites. If a blogroll entry was added or modified this single Link will be updated.
 
-In a configured interval of dates will the favicon cache be refreshed, because the favicons from the remote site can be changed.
+All cached icons can conveniently be assigned to any of the bookmarks, just a mouse click.
 
-The plugin fallback on a default favicon, if on the remote websites cannot be detected a valid favicon. The default icon can be configured.
+The plugin fallback to a default icon, if on the remote websites cannot be detected a valid favicon. The default icon can be configured like any other bookmark.
+
 
 == Screenshots ==
-1. Two Blogrolls examples with Faviroll icons
-2. Configuration panel
-3. Faviroll is on the run to (re)build the icon cache
+1. two blogrolls examples with Faviroll icons
+2. where you find faviroll in the backend and the initialize button
+3. working spin while building the cache images
+4. the backend panel
 
 == Installation ==
-1. Upload the folder faviroll to the /wp-content/plugins/ directory.
-1. Activate the plugin through the 'Plugins' menu in WordPress.
-1. Initialize plugin with its settings in general options by clicking the 'Submit' button.
-1. The locally favicon cache will be created.
-1. Thats all, enjoy.
+1. install & activate the plugin.
+1. initialize plugin with by clicking the 'Click here to start' button.
+1. the favicon cache will be created.
+1. play.
 
 == Changelog ==
 Explanation:
@@ -36,6 +35,12 @@ Explanation:
 * OPT = Optimization
 * CLN = Cleanup/Refactoring
 * OTH = Other
+
+= 0.5 =
+* FEA: Complete redesign of the backend-panel with many customizing options and usability improvements
+* FEA: No submit button any change is saved immediately via ajax technology.
+* FEA: Possibility to assign any image for "custom icons", workaround to use an icon with a better quality.
+* OPT: Full Code maintenance.
 
 = 0.4.8.2 =
 * OPT: Code maintenance for WP 3.x
@@ -112,3 +117,7 @@ There is nothing to do for you
 == Frequently Asked Questions ==
 = Do the plugin work with WordPress MU? =
  Yes, plugin is WPMU compatible up to version 0.4.6 
+
+= What's about favicons of https (SSL) Websites? =
+ The plugin is 100% written in PHP. In PHP it isn't possible to decode SSL sites, so the plugin try to fallback to "[curl](http://curl.haxx.se/)".
+ If this is not available on your webserver, the favicon will not displayed.

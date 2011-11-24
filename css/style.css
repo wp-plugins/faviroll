@@ -1,0 +1,23 @@
+/*
+Faviroll common CSS file
+Author: andurban.de
+Version: latest
+*/
+
+
+
+/* Disable list-style in Important if you use "WP Render Blogroll Links"
+ * @see http://wordpress.org/extend/plugins/wp-render-blogroll-links/
+ */
+li.faviroll {
+ list-style:none !important;
+}
+
+li.faviroll a.faviroll {
+ padding:2px 0px 2px 22px !important;
+ line-height:20px;
+}
+
+/* You may here anhanced style the blogroll-links */
+.faviroll {
+}

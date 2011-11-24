@@ -1,11 +1,11 @@
 <?php
 /*
  Plugin Name: FAVIROLL - FAVIcons for blogROLL
- Plugin URI: http://www.grobator.de/wordpress-stuff/plugins/faviroll
- Description: Locally caches all favicon.ico in PNG format and use this into the blogroll. Native ICO Images are not supported from all browsers/operating systems.
- Author: grobator
- Version:  0.4.8.2
- Author URI:  http://www.grobator.de/
+ Plugin URI: http://www.andurban.de/wordpress-stuff/plugins/faviroll
+ Description: Caches all favicon.ico in PNG format and use this in your blogroll.
+ Author: andurban.de
+ Version:  0.5
+ Author URI:  http://www.andurban.de/
  ----------------------------------------------------------------------------------------
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -24,16 +24,65 @@
 
 // Debug only on localhost
 if ($_SERVER['HTTP_HOST'] == 'localhost') error_reporting(E_ALL);  // |E_STRICT
+	
 
-require_once('Faviroll.class.php');
+	########################
+	#     BEGIN Common     #
+	########################
+
+	/**
+	 * Faviroll CSS in a enqueue way
+	 */
+	function enqueueFavirollScriptsAndStyles() {
+	
+		$plugin_dir = plugin_dir_path(__FILE__);
+		
+		if (is_admin()) {
+		
+			// @see http://codex.wordpress.org/Function_Reference/wp_enqueue_style
+			//
+			$myUrl = plugins_url('css/style-be.css', __FILE__); 
+			$myFile = "${plugin_dir}css/style-be.css";
+	
+			if (file_exists($myFile)) {
+				wp_register_style('faviroll-be', $myUrl);
+				wp_enqueue_style('faviroll-be');
+			}
+	
+			// @see http://codex.wordpress.org/Function_Reference/wp_enqueue_script
+			//
+			$myUrl = plugins_url('js/faviroll.js', __FILE__); 
+			$myFile = "${plugin_dir}js/faviroll.js";
+		
+			if (file_exists($myFile)) {
+				wp_register_script('faviroll', $myUrl, array('jquery'), '1.0');
+				wp_enqueue_script('faviroll');
+			}
+		}
+	
+		// queueing Common CSS styles
+		$myUrl = plugins_url('css/style.css', __FILE__); 
+		$myFile = "${plugin_dir}css/style.css";
+
+		if (file_exists($myFile)) {
+			wp_register_style('faviroll', $myUrl);
+			wp_enqueue_style('faviroll');
+		}
+		
+	}	
+	enqueueFavirollScriptsAndStyles();
+	
+	########################
+	#      END Common      #
+	########################
+
 
 if (is_admin()) {
-  #################
-  # Backend Area  #
-  #################
 
-	require_once('FavirollAdmin.class.php');
-
+	########################
+	#  BEGIN Backend Area  #
+	########################
+	
 	/**
 	 * Add Settings link to plugin page
 	 * @param unknown_type $links
@@ -50,46 +99,20 @@ if (is_admin()) {
 	/**
 	 * Faviroll options menu
 	 */
-	function faviroll_settings() {
+	function faviroll_option_page() {
+		require_once('FavirollAdmin.class.php');
 		$fa = new FavirollAdmin();
-		$fa->settings();
+		$fa->option_page();
 	}
 
 
 	/**
-	 * Register Faviroll menu in general options menu
+	 * Register Faviroll options in 'Links' options menu
 	 */
 	function faviroll_menu() {
-		add_submenu_page('link-manager.php', __('Faviroll', 'faviroll'), __('Faviroll', 'faviroll'), 'manage_options', basename(__FILE__), 'faviroll_settings');
+		add_submenu_page('link-manager.php', __('Faviroll', 'faviroll'), __('Faviroll', 'faviroll'), 'manage_options', basename(__FILE__), 'faviroll_option_page');
 	}
 	add_action('admin_menu', 'faviroll_menu');
-
-
-	/**
-	 * The admin-page renew the favicons after the configured time
-	 */
-	function faviroll_revisit() {
-
-		$opts = get_option('faviroll');
-		$isOk = ($opts && isset($opts['lastcheck']) && isset($opts['revisit']));
-		if (!$isOk)
-			return false;
-
-		$lastcheck = (float)$opts['lastcheck'];
-		$revisit = (int)$opts['revisit'];
-
-		$offsetFromNow = @strtotime("$revisit days ago midnight");
-		if ($offsetFromNow === false)
-			$offsetFromNow = time('0 days ago midnight');
-
-		if ($offsetFromNow < $lastcheck)
-			return false;
-
-		$fa = new FavirollAdmin();
-		return $fa->revisit();
-
-	}
-	add_action('admin_notices', 'faviroll_revisit');
 
 
 	/**
@@ -97,39 +120,44 @@ if (is_admin()) {
 	 * @param $link_id - Database id of the current bookmark
 	 */
 	function faviroll_single_favicon($link_id) {
+		require_once('Faviroll.class.php');
 
-		$fa = new FavirollAdmin();
-		$fa->putIconIntoCache(get_link($link_id));
+		$bm = get_bookmark($link_id);
+		$bookmark = $bm->link_url;
+
+		$fr = new Faviroll();
+		$fr->putIconIntoCache($bookmark);
 	}
 	add_action('edit_link', 'faviroll_single_favicon');
 	add_action('add_link' , 'faviroll_single_favicon');
 
+	######################
+	#  END Backend Area  #
+	######################
+	
+
 } else {
 
-  ##################
-  # Fromtend Area  #
-  ##################
-
+	#########################
+	#  BEGIN Frondend Area  #
+	#########################
+	
 	/**
 	 * Main function
 	 */
 	function faviroll_list_bookmarks($output) {
+		require_once('Faviroll.class.php');
+		
 		$fr = new Faviroll();
 		return $fr->apply($output);
 	}
 	add_filter('wp_list_bookmarks', 'faviroll_list_bookmarks');
 	add_filter('wp_list_bookmarks_plus', 'faviroll_list_bookmarks');
 
-	/**
-	 * Register Enqueue CSS, if option is activated in Faviroll-Settings
-	 */
-	function faviroll_enqueue_scripts() {
-		$opts = get_option('faviroll');
-
-		if ($opts && isset($opts['use_stylesheet']) && (bool)$opts['use_stylesheet'])
-			wp_enqueue_style('faviroll', WP_PLUGIN_URL.'/faviroll/style.css');
-	}
-	add_action('wp_enqueue_scripts', 'faviroll_enqueue_scripts');
+	#######################
+	#  END Frondend Area  #
+	#######################
+	
 
 } // end if is_admin()
 

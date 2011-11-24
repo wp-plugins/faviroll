@@ -55,7 +55,7 @@ class Ico {
 	 * @type boolean = false
 	 * @var  public
 	 **/
-	var $bgcolor_transparent = false;
+	var $bgcolor_transparent = true;
 
 	/**
 	 * Ico::Ico()
@@ -65,7 +65,7 @@ class Ico {
 	 * @param   optional    boolean  $transparency   create PNG with transparent background
 	 * @return              void
 	 **/
-	function Ico($path=null,$transparency=false) {
+	function Ico($path=null,$transparency=true) {
 		if (!is_null($path))
 			$this->LoadFile($path);
 
@@ -271,7 +271,7 @@ class Ico {
 	 * @return             boolean                     Is Transparent or not
 	 **/
 	function SetBackgroundTransparent($is_transparent = true) {
-			return ($this->bgcolor_transparent = $is_transparent);
+		return ($this->bgcolor_transparent = $is_transparent);
 	}
 
 	/**
@@ -304,6 +304,7 @@ class Ico {
 			if ($this->bgcolor_transparent) {
 					imagecolortransparent($im, $bgcolor);
 			}
+
 
 			/**
 			 * allocate pallete and get XOR image
@@ -560,7 +561,7 @@ class Ico {
 		if (strlen($data) < 10)
 			return false;
 
-		$header = join ('',unpack('H16', $data));
+		$header = implode('',unpack('H16', $data));
 
 		return ($header == '89504e470d0a1a0a');
 	}
@@ -574,7 +575,7 @@ class Ico {
 		if (strlen($data) < 22)
 			return false;
 
-		$header = join ('',unpack('H20', $data));
+		$header = implode('',unpack('H20', $data));
 
 		return (substr($header,0,6) == 'ffd8ff' && strstr($header,'4a464946') !== false);
 	}
@@ -631,7 +632,7 @@ class Ico {
 	function getOtherFormatImage(&$data,$type) {
 
 		// Zuerst versuchen mit der Standard PHP Methode das Image aus dem binary string zu erzeugen
-		$image = @imagecreatefromstring(&$data);
+		$image = @imagecreatefromstring($data);
 
 		// schlägt dieses fehl, versuche es mit dem BMP-Import
 		if ($image === false) {
