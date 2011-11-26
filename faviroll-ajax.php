@@ -86,20 +86,19 @@ function updateLinkImage($link_id,$newicon) {
 					break;
 
 			case 'reload':
-				
 				if($req_url && $req_siteid) {
-
+					require_once('../../../wp-blog-header.php');  
+					
 					$fa = new FavirollWorker($req_wpmu_prefix);
 					// Factory-Icon erneuern
 					if (strstr($req_siteid,'site-0-') == $req_siteid) {
-						$basename = $fa->initFactoryIcon(true);
+						$basename = $fa->initDefaultIcon(true);
 					} elseif ($fa->putIconIntoCache($req_url)) {
 						extract($fa->getURLinfo($req_url),EXTR_OVERWRITE);
 					}
 
 					// Bisher kein basename, also Fallback aus der Datenbank
 					if (!isset($basename)) {
-							require_once('../../../wp-blog-header.php');  
 							if (function_exists('get_option')) {
 								$opts = get_option('faviroll');
 								if (!$opts)

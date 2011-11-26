@@ -60,6 +60,7 @@ class FavirollAdmin extends Faviroll {
 				}
 			}
 		}
+
 		return true;
 	}
 
@@ -67,19 +68,23 @@ class FavirollAdmin extends Faviroll {
 	/**
 	 * make shure that default icon exists
 	 */
-	function initDefaultIcon() {		
+	function initDefaultIcon() {
 		$reset = false;
-		$factory_basename =  $this->worker->initFactoryIcon($reset);
-		if (!$factory_basename)
+		$basename = $this->worker->initDefaultIcon($reset);
+		if (!$basename)
 			return false;
 
+		$cacheDir = $this->getCacheDir();
+		$default_cache = $cacheDir.$basename;
+
 		$key = 'default-icon';
-		$cur_default = $this->getopt($key);
-		if (!$cur_default) {
-			$this->opts[$key] = $factory_basename;
+		$default_icon = $this->getopt($key);
+		if (!$default_icon OR (!file_exists($default_cache))) {
+			$this->opts[$key] = $basename;
 			update_option('faviroll', $this->opts);
 		}
 
+		return $basename;
 	}
 
 
@@ -148,6 +153,14 @@ class FavirollAdmin extends Faviroll {
 	function getMD5($url) {
 		return $this->worker->getMD5($url);
 	}
+
+	/**
+	 * @see 
+	 */
+	function getHomeURL() {
+		return $this->worker->getHomeURL();
+	}
+
 	
 	/**
 	 * Check write permissions on cache directory.
@@ -246,15 +259,10 @@ Use your ftp client, or the following command to fix it:<br />
 			if (empty($basename))
 				continue;
 				
-				
 			$siteIcon = "$cacheurl/";
-			if (isset($bm->factory_image)) {
-				$siteIcon.= $bm->factory_image;
-			} else {
-				// original site favicon from cache or fallback to default
-				$siteIcon.= (in_array($basename,$cacheIcons)) ? $basename : $default->basename;
-			}
-	
+			$siteIcon.= (in_array($basename,$cacheIcons)) ? $basename : $default->basename;
+				
+				
 			$md5key = $this->getMD5($bm->link_url);
 			$id = $bm->link_id;
 			$siteId = "site-$id-$md5key";
@@ -331,10 +339,11 @@ Use your ftp client, or the following command to fix it:<br />
 		$title = __('FAVIcons for blogROLL', 'faviroll');
 
 		echo <<<EOT
+  <div id="_countdown" class="updated fade hidden">0 icons left</div>
   <div class="wrap">
    <div id="icon-options-general" class="icon32"><br /></div>
-    <h2>${title}</h2>${message}
-	<div style="float: right;margin:10px;padding-right:50px;">
+    <h2>${title}</h2>${message}    
+    <div style="float:right;margin:10px;padding-right:50px;">
 	  <a href="http://donate.andurban.de/"><img src="${myDir}/img/donate.gif" border="0" alt="donate" title="Donations welcome" /></a>
     </div>
   <!--BEGIN Faviroll-Form-->

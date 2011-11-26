@@ -1,10 +1,10 @@
 === FAVIROLL - FAVIcons for blogROLL ===
-Contributors: andurban
+Contributors: and
 Donate link: http://donate.andurban.de/
 Tags: favicons, links, icons, blogroll, bookmarks
 Requires at least: 3.x
 Tested up to: 3.2.1
-Stable tag: 0.5
+Stable tag: 0.5.1
 
 == Description ==
 
@@ -13,7 +13,6 @@ This plugin convert the favicon.ico from the blogroll sites into PNG images and 
 All cached icons can conveniently be assigned to any of the bookmarks, just a mouse click.
 
 The plugin fallback to a default icon, if on the remote websites cannot be detected a valid favicon. The default icon can be configured like any other bookmark.
-
 
 == Screenshots ==
 1. two blogrolls examples with Faviroll icons
@@ -35,6 +34,10 @@ Explanation:
 * OPT = Optimization
 * CLN = Cleanup/Refactoring
 * OTH = Other
+
+= 0.5.1 =
+* OPT: The favicon from own site is now the default icon for bookmarks without a favicon.
+* OPT: Countdown box while refeshing favicons from foreign sites for better feedback.
 
 = 0.5 =
 * FEA: Complete redesign of the backend-panel with many customizing options and usability improvements
@@ -111,13 +114,11 @@ Now I use wordpress core function `wp_upload_dir()` to create the (persistent) c
 = 0.1 =
 * Initial version
 
-== Upgrade notice ==
-There is nothing to do for you
+== Upgrade Notice ==
+Nothing to do for you
 
 == Frequently Asked Questions ==
-= Do the plugin work with WordPress MU? =
- Yes, plugin is WPMU compatible up to version 0.4.6 
-
 = What's about favicons of https (SSL) Websites? =
  The plugin is 100% written in PHP. In PHP it isn't possible to decode SSL sites, so the plugin try to fallback to "[curl](http://curl.haxx.se/)".
  If this is not available on your webserver, the favicon will not displayed.
+ 

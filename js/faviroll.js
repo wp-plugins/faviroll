@@ -107,6 +107,9 @@ Faviroll.prototype = {
 			row.siteTD.img.src = favi.env.load_icon_url;
 		};
 
+
+		this.setCountdown(kju.length -1,true);
+		
 		// Ins Environment übergeben, wegen setTimeout
 		favi.env.ajaxq = kju;
 
@@ -215,7 +218,7 @@ Faviroll.prototype = {
 				this.cb_restore_done(param);
 				break;
 			case 'reload':
-				this.cb_reolad_done(param);
+				this.cb_reload_done(param);
 				break;
 			case 'useicon':
 				this.cb_useicon_done(param);
@@ -260,7 +263,7 @@ Faviroll.prototype = {
 	/**
 	 * Callback Function of ajax query for action:reload 
 	 */
-	cb_reolad_done : function (_param) {
+	cb_reload_done : function (_param) {
 		if (!(_param && _param.siteid && _param.basename))
 			return false;
 
@@ -284,7 +287,9 @@ Faviroll.prototype = {
 
 		if (link.icon_url.indexOf('/img/wpspin_light.gif') > -1)
 			link.style.backgroundImage = 'url(' + faviconURL + ')';
-		
+
+		this.setCountdown(-1);
+
 		return true;
 	},
 
@@ -329,7 +334,7 @@ Faviroll.prototype = {
 		if (_param.basename == 'invalid') {
 			faviconURL = favi.env.plugin_url + 'img/empty.png';
 		} else {
-			faviconURL = favi.env.plugin_url + 'cache/' + _param.basename;
+			faviconURL = favi.env.plugin_url + 'cache/' + _param.basename + '?' + Math.round((Math.random() * 1000000000));
 		}
 
 		var img = custTD.getElementsByTagName('img');
@@ -342,6 +347,33 @@ Faviroll.prototype = {
 	},
 
 
+	/**
+	 * 
+	 */
+	setCountdown : function (_number,_show) {
+		
+		var div = document.getElementById('_countdown');
+		if (!div)
+			return false;
+
+		var count = div.innerHTML.split(' ');
+		count = parseInt(count.shift()) + _number;
+
+		div.innerHTML = count + ' icons left';
+
+		// Ausblenden
+		if (count < 1)
+			div.className = div.className.replace(/visible/,'hidden');
+		
+		if (_show) {
+			div.className = div.className.replace(/hidden/,'visible');
+			div.innerHTML = _number + ' icons left';
+		};
+
+		return false;
+	},
+	
+	
 	/**
 	 * Initalize the cache.
 	 * Initialization goes in two stages

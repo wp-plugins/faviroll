@@ -23,11 +23,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 class FavirollWorker {
 
+	var $homeurl = null;
 	var $wpmu_prefix = null;
 	var $cachedir = null;
 	var $plugindir = null;
 	var $factory_basename = null;
-	
+
+
 	/**
 	 * Constructor
 	 */
@@ -36,16 +38,36 @@ class FavirollWorker {
 		$this->plugindir = $this->normalize(dirname(__FILE__));
 		$this->cachedir = $this->plugindir.'/cache/';
 
-		$prefix = $this->getCacheFilePrefix();
-		$this->factory_basename =  $prefix.$this->getMD5('faviroll-factory-icon');		
+		$this->initHomeURL();
+
+		$customColumn = 1;
+		$this->factory_basename =  $this->getCacheFilePrefix($customColumn) . $this->getMD5($this->getHomeURL());		
 	}
 
+	#################
+  #               #
+	#    SETTER     #
+	#               #
+	#################
+	
 
+	/**
+	 * 
+	 */	
+	function initHomeURL() {
+		$elems = explode('wp-admin',$_SERVER['HTTP_REFERER']);
+		$this->homeurl = array_shift($elems);
+
+		return true;
+	}
+	
+	
 	#################
   #               #
 	#    GETTER     #
 	#               #
 	#################
+
 
 	/**
 	 * Getter:
@@ -97,6 +119,12 @@ class FavirollWorker {
 		return $this->factory_basename;
 	}
 
+	/**
+	 * 
+	 */
+	function getHomeURL() {
+		return $this->homeurl;
+	}
 	
 	/**
 	 * Loads the given filename if the needed class isn't defined already
@@ -129,6 +157,32 @@ class FavirollWorker {
 		return rtrim($result,'/');
 	}
 
+	
+	/**
+	 * make shure that default icon exists
+	 */
+	function initDefaultIcon($reset=false) {
+
+		$this->initFactoryIcon($reset);
+		$homeurl = $this->getHomeURL();
+		
+		$customColumn = false;
+		extract($this->getURLinfo($homeurl,$customColumn), EXTR_OVERWRITE);
+		if (!isset($basename))
+			return false;
+
+		$cacheDir = $this->getCacheDir();
+		$default_cache = $cacheDir.$basename;
+		if (!$reset AND file_exists($default_cache))
+			return $basename;
+
+		$isOk = $this->putIconIntoCache($homeurl,$customColumn);
+		if (!$isOk)
+			return false;
+	
+		return $basename;
+	}
+	
 
 	/**
 	 * 

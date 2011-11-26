@@ -3,9 +3,10 @@
  Plugin Name: FAVIROLL - FAVIcons for blogROLL
  Plugin URI: http://www.andurban.de/wordpress-stuff/plugins/faviroll
  Description: Caches all favicon.ico in PNG format and use this in your blogroll.
- Author: andurban.de
- Version:  0.5
+ Author: and
+ Version:  0.5.1
  Author URI:  http://www.andurban.de/
+ Plugin URI:  http://www.andurban.de/tag/faviroll
  ----------------------------------------------------------------------------------------
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -24,7 +25,6 @@
 
 // Debug only on localhost
 if ($_SERVER['HTTP_HOST'] == 'localhost') error_reporting(E_ALL);  // |E_STRICT
-	
 
 	########################
 	#     BEGIN Common     #

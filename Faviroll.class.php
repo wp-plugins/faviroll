@@ -196,7 +196,6 @@ class Faviroll extends WP_Widget {
 		return $this->getopt('default-icon');
 	}
 
-
 	/**
 	 * @see
 	 */
@@ -204,15 +203,20 @@ class Faviroll extends WP_Widget {
 		return $this->worker->getFactoryBasename();
 	}
 
-
 	/**
 	 * @see 
 	 */
 	function putIconIntoCache($bookmark) {
 		return $this->worker->putIconIntoCache($bookmark);
 	}
-	
-	
+
+	/**
+	 * @see 
+	 */
+	function getHomeURL() {
+		return $this->worker->getHomeURL();
+	}
+
 	/**
 	 * @see 
 	 */
@@ -231,10 +235,9 @@ class Faviroll extends WP_Widget {
 		$default = new stdClass();
 		$default->link_id = 0;
 		$default->basename = $this->getDefaultBasename();
-		$default->link_url = $default->basename;
+		$default->link_url = $this->getHomeURL();
 		$default->link_image = $default->basename;
 		$default->link_name ='Default Icon';
-		$default->factory_image	= $this->getFactoryBasename();
 
 		// append the list of bookmarks after default icon
 		$result = array_merge(array($default), get_bookmarks() );
