@@ -1,10 +1,10 @@
 === FAVIROLL - FAVIcons for blogROLL ===
-Contributors: and
+Contributors: UnderWordPressure
 Donate link: http://donate.andurban.de/
 Tags: favicons, links, icons, blogroll, bookmarks
 Requires at least: 3.x
 Tested up to: 3.2.1
-Stable tag: 0.5.1
+Stable tag: 0.5.1.1
 
 == Description ==
 
@@ -34,6 +34,9 @@ Explanation:
 * OPT = Optimization
 * CLN = Cleanup/Refactoring
 * OTH = Other
+
+= 0.5.1.1 =
+* FIX: Resolved an javascript/ajax problem. images were not updated correctly.
 
 = 0.5.1 =
 * OPT: The favicon from own site is now the default icon for bookmarks without a favicon.
@@ -121,4 +124,11 @@ Nothing to do for you
 = What's about favicons of https (SSL) Websites? =
  The plugin is 100% written in PHP. In PHP it isn't possible to decode SSL sites, so the plugin try to fallback to "[curl](http://curl.haxx.se/)".
  If this is not available on your webserver, the favicon will not displayed.
- 
+
+= Where does the plugin come from? =
+ see: [http://www.andurban.de/tag/faviroll](http://www.andurban.de/tag/faviroll)
+
+= Can I save my custom favicons before install an update? =
+  No, sorry.
+  The cache directory is currently a subdirectory in the plugin directory, I designed this to hold all together.
+  The wordpress update installer remove the whole old plugin directory before install the update, so all cached icons will removed, too.

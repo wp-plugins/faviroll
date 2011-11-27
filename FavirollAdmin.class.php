@@ -227,6 +227,7 @@ Use your ftp client, or the following command to fix it:<br />
 	function getBookmarkTable() {
 		
 		$isCacheInitMode = (defined('DO_INIT_CACHE'));
+		
 		$result = '';
 
 		if ($isCacheInitMode)
@@ -253,15 +254,18 @@ Use your ftp client, or the following command to fix it:<br />
 		$cacheIcons = $this->getCacheIcons();
 		$cacheurl = $this->getCacheURL();
 		foreach ($bookmarks as $bm) {
-
 			$customColumn=false;
 			extract($this->getURLinfo($bm->link_url, $customColumn), EXTR_OVERWRITE);
 			if (empty($basename))
 				continue;
 				
-			$siteIcon = "$cacheurl/";
-			$siteIcon.= (in_array($basename,$cacheIcons)) ? $basename : $default->basename;
-				
+			// Cache Init Modus bekommen alle erstmal das Spin-Icon
+			if ($isCacheInitMode) {
+					$siteIcon = $loadIcon;
+			} else {
+				$siteIcon = "$cacheurl/";
+				$siteIcon.= (in_array($basename,$cacheIcons)) ? $basename : $default->basename;
+			}
 				
 			$md5key = $this->getMD5($bm->link_url);
 			$id = $bm->link_id;
@@ -270,11 +274,12 @@ Use your ftp client, or the following command to fix it:<br />
 			$currentBasename = strstr($bm->link_image,'faviroll-');  // alles links vom String "faviroll-" entfernen
 			$image_url = ($currentBasename) ? "$cacheurl/$currentBasename" : $basename;
 
-			// Wenn cacheurl im Pfad enthalten ist, nimm das Cache-Icon sonst das Fallback auf das Site-Icon.
+			// Cache Init Modus bekommen alle erstmal das Spin-Icon
 			if ($isCacheInitMode) {
 					$currentIcon = $loadIcon;
 			} else {
-					$currentIcon = (strstr($image_url,$cacheurl)) ? $image_url : $siteIcon;
+				// Wenn cacheurl im Pfad enthalten ist, nimm das Cache-Icon sonst das Fallback auf das Site-Icon.
+				$currentIcon = (strstr($image_url,$cacheurl)) ? $image_url : $siteIcon;
 			}
 
 			// Spalte Custom Icon

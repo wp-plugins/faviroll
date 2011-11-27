@@ -1,6 +1,6 @@
 /**
  * faviroll.js - JavaScript for Faviroll backend
- * Author: andurban.de
+ * Author: UnderWordPressure
  * Version: latest
  * ----------------------------------------------------------------------------------------
  * Copyright 2009-2011 andurban.de  (email: http://www.andurban.de/kontakt)
@@ -106,12 +106,13 @@ Faviroll.prototype = {
 
 			row.siteTD.img.src = favi.env.load_icon_url;
 		};
-
-
-		this.setCountdown(kju.length -1,true);
 		
 		// Ins Environment übergeben, wegen setTimeout
 		favi.env.ajaxq = kju;
+
+
+		var qlen = kju.length -1;
+		window.setTimeout('favi.roll.initCountdown(' + qlen +')', 20);
 
 		// kleinen Timeout setzen, da ansonsten die GUI nicht aktualisiert wird.
 		window.setTimeout('favi.roll.runAjaxQ()', 222);
@@ -350,25 +351,37 @@ Faviroll.prototype = {
 	/**
 	 * 
 	 */
-	setCountdown : function (_number,_show) {
+	initCountdown : function(_counter) {
+
+		var div = document.getElementById('_countdown');
+		if (!div)
+			return false;
+
+		div.className = div.className.replace(/hidden/,'visible');
+		div.innerHTML = _counter + ' icons left';
+	},
+
+
+	/**
+	 * 
+	 */
+	setCountdown : function (_number) {
 		
 		var div = document.getElementById('_countdown');
 		if (!div)
 			return false;
 
-		var count = div.innerHTML.split(' ');
-		count = parseInt(count.shift()) + _number;
+		var counter;
+		var elems = div.innerHTML.split(' ');
+		if (elems && elems.length > 2) {
+			counter = elems[0] = parseInt(elems[0]) + _number;
 
-		div.innerHTML = count + ' icons left';
-
-		// Ausblenden
-		if (count < 1)
-			div.className = div.className.replace(/visible/,'hidden');
-		
-		if (_show) {
-			div.className = div.className.replace(/hidden/,'visible');
-			div.innerHTML = _number + ' icons left';
+			div.innerHTML = elems.join(' ');
 		};
+		
+		// Ausblenden
+		if (!isNaN(counter) && counter < 1)
+			div.className = div.className.replace(/visible/,'hidden');
 
 		return false;
 	},

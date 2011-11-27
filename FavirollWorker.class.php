@@ -52,10 +52,20 @@ class FavirollWorker {
 	
 
 	/**
-	 * 
+	 * Init member: homeurl by resoving self url from this wordpress installation
 	 */	
 	function initHomeURL() {
-		$elems = explode('wp-admin',$_SERVER['HTTP_REFERER']);
+
+		$proto = explode('/', $_SERVER['SERVER_PROTOCOL']);
+		$proto = strtolower(array_shift($proto));
+
+		if (isset($_SERVER['HTTPS']) AND $_SERVER['HTTPS'] == 'on')
+			$proto.= 's';
+		
+		$port = ($_SERVER['SERVER_PORT'] == 80) ? '' : (':'.$_SERVER['SERVER_PORT']);
+
+    $url = $proto.'://'.$_SERVER['SERVER_NAME'].$port.$_SERVER['REQUEST_URI'];
+		$elems = explode('wp-admin',$url);
 		$this->homeurl = array_shift($elems);
 
 		return true;
