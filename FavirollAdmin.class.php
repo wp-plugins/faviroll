@@ -1,25 +1,25 @@
 <?php
 /*
-FavirollAdmin - Class for wordpress plugin "Faviroll" backend
-Author: ANDURBAN.DE
-Version: latest
-----------------------------------------------------------------------------------------
-Copyright 2009-2011 andurban.de  (email: http://www.andurban.de/kontakt)
+ FavirollAdmin - Class for wordpress plugin "Faviroll" backend
+ Author: ANDURBAN.DE
+ Version: latest
+ ----------------------------------------------------------------------------------------
+ Copyright 2009-2011 andurban.de  (email: http://www.andurban.de/kontakt)
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 require_once('Faviroll.class.php');
 class FavirollAdmin extends Faviroll {
@@ -35,7 +35,7 @@ class FavirollAdmin extends Faviroll {
 
 
 	#################
-  #               #
+	#               #
 	#    SETTER     #
 	#               #
 	#################
@@ -56,7 +56,7 @@ class FavirollAdmin extends Faviroll {
 			if ($files) {
 				foreach($files as $filename) {
 					if (is_file($filename))
-						@unlink($filename);
+					@unlink($filename);
 				}
 			}
 		}
@@ -72,7 +72,7 @@ class FavirollAdmin extends Faviroll {
 		$reset = false;
 		$basename = $this->worker->initDefaultIcon($reset);
 		if (!$basename)
-			return false;
+		return false;
 
 		$cacheDir = $this->getCacheDir();
 		$default_cache = $cacheDir.$basename;
@@ -105,23 +105,23 @@ class FavirollAdmin extends Faviroll {
 		$fullpath = true;
 		foreach($this->getCacheIcons($withsize,$fullpath) as $filename) {
 			if (is_file($filename))
-				@unlink($filename);
+			@unlink($filename);
 		}
 
-		
+
 	 // Update $wpdb->link_image
-	 	global $wpdb;
+		global $wpdb;
 		$sqlcmd = "UPDATE $wpdb->links SET link_image = null WHERE (link_image like %s OR link_image like %s)";
 		$replaced = $wpdb->query( $wpdb->prepare($sqlcmd, 'faviroll-%_%','%/faviroll-%_%'));
-//echo "$replaced rows updated";	
+		//echo "$replaced rows updated";
 
 		return true;
 	}
 
-	
-	
+
+
 	#################
-  #               #
+	#               #
 	#    GETTER     #
 	#               #
 	#################
@@ -132,36 +132,36 @@ class FavirollAdmin extends Faviroll {
 	function getWPMUPrefix() {
 		return $this->worker->getWPMUPrefix();
 	}
-	
+
 	/**
-	 * @see 
+	 * @see
 	 */
 	function getPluginDir() {
 		return $this->worker->getPluginDir();
 	}
 
 	/**
-	 * @see 
+	 * @see
 	 */
 	function getFactoryBasename() {
 		return $this->worker->getFactoryBasename();
 	}
 
 	/**
-	 * @see 
+	 * @see
 	 */
 	function getMD5($url) {
 		return $this->worker->getMD5($url);
 	}
 
 	/**
-	 * @see 
+	 * @see
 	 */
 	function getHomeURL() {
 		return $this->worker->getHomeURL();
 	}
 
-	
+
 	/**
 	 * Check write permissions on cache directory.
 	 * @return error message if cache directory is not writable, or the string is given into method
@@ -169,7 +169,7 @@ class FavirollAdmin extends Faviroll {
 	function getCachePermCheckMsg($passtru_message=null) {
 
 		if (!$this->can_write_cache())
-			return '<b>CAUTION</b>, no file permission to create icon-cache.
+		return '<b>CAUTION</b>, no file permission to create icon-cache.
 <p>You have to change the permissions.<br />
 Use your ftp client, or the following command to fix it:<br />
 <br />
@@ -194,17 +194,17 @@ Use your ftp client, or the following command to fix it:<br />
 	 */
 	function is__writable($path) {
 		if ($path{strlen($path)-1}=='/')
-			return $this->is__writable($path.uniqid(mt_rand()).'.tmp');
+		return $this->is__writable($path.uniqid(mt_rand()).'.tmp');
 
 		if (file_exists($path)) {
 			if (!($f = @fopen($path, 'r+')))
-				return false;
+			return false;
 			fclose($f);
 			return true;
 		}
 
 		if (!($f = @fopen($path, 'w')))
-			return false;
+		return false;
 
 		fclose($f);
 		unlink($path);
@@ -219,19 +219,19 @@ Use your ftp client, or the following command to fix it:<br />
 	function getImgURL($name) {
 		return $this->pluginurl.'img/'.$name;
 	}
-	
-	
+
+
 	/**
 	 * @return The bookmark table for option page.
 	 */
 	function getBookmarkTable() {
-		
+
 		$isCacheInitMode = (defined('DO_INIT_CACHE'));
-		
+
 		$result = '';
 
 		if ($isCacheInitMode)
-			$result.= '<script type="text/javascript">var FAVIROLL_INITCACHE = true;</script>
+		$result.= '<script type="text/javascript">var FAVIROLL_INITCACHE = true;</script>
 ';
 
 		$result.= '<!-- Faviroll Helper Environment--> <input type="hidden" id="wpmu_prefix" value="'.$this->getWPMUPrefix().'" />
@@ -258,25 +258,25 @@ Use your ftp client, or the following command to fix it:<br />
 			extract($this->getURLinfo($bm->link_url, $customColumn), EXTR_OVERWRITE);
 			if (empty($basename))
 				continue;
-				
+
 			// Cache Init Modus bekommen alle erstmal das Spin-Icon
 			if ($isCacheInitMode) {
-					$siteIcon = $loadIcon;
+				$siteIcon = $loadIcon;
 			} else {
 				$siteIcon = "$cacheurl/";
 				$siteIcon.= (in_array($basename,$cacheIcons)) ? $basename : $default->basename;
 			}
-				
+
 			$md5key = $this->getMD5($bm->link_url);
 			$id = $bm->link_id;
 			$siteId = "site-$id-$md5key";
-	
+
 			$currentBasename = strstr($bm->link_image,'faviroll-');  // alles links vom String "faviroll-" entfernen
 			$image_url = ($currentBasename) ? "$cacheurl/$currentBasename" : $basename;
 
 			// Cache Init Modus bekommen alle erstmal das Spin-Icon
 			if ($isCacheInitMode) {
-					$currentIcon = $loadIcon;
+				$currentIcon = $loadIcon;
 			} else {
 				// Wenn cacheurl im Pfad enthalten ist, nimm das Cache-Icon sonst das Fallback auf das Site-Icon.
 				$currentIcon = (strstr($image_url,$cacheurl)) ? $image_url : $siteIcon;
@@ -307,23 +307,23 @@ Use your ftp client, or the following command to fix it:<br />
 
 		$result.= '</tbody></table></div>
 ';
-		
+
 		return $result;
 	}
-	
-	
+
+
 	#################
-  #               #
+	#               #
 	#    PAINTER    #
 	#               #
 	#################
-	
+
 
 	/**
 	 * The Backend option page
 	 */
-	function option_page() {	
-		
+	function option_page() {
+
 		$message = null;
 		if ($_POST) {
 
@@ -338,7 +338,7 @@ Use your ftp client, or the following command to fix it:<br />
 
 		$message = $this->getCachePermCheckMsg($message);
 		if (!is_null($message))
-			$message = "<div class='updated fade below-h2' id='message'><p>$message</p></div>";
+		$message = "<div class='updated fade below-h2' id='message'><p>$message</p></div>";
 			
 		$myDir = plugin_dir_url(__FILE__);
 		$title = __('FAVIcons for blogROLL', 'faviroll');
@@ -355,20 +355,20 @@ Use your ftp client, or the following command to fix it:<br />
    <form id="faviform" name="faviform" method="post" action="">
 EOT;
 
-	if (!defined('DO_INIT_CACHE') && $this->cacheIconsCount() < 3) {
+		if (!defined('DO_INIT_CACHE') && $this->cacheIconsCount() < 3) {
 
-		echo <<<EOT
+			echo <<<EOT
     <div style="text-align:center;padding-top:120px;">
      <h2>Welcome to FAVIROLL</h2>
 		 <input id="initbutton" type="submit" title="" value="Click here to start" onclick="return favi.roll.initCache();" />
     </div>
 EOT;
 
-	} else {
-		echo $this->getBookmarkTable();		
-	}
+		} else {
+			echo $this->getBookmarkTable();
+		}
 
-	echo <<<EOT
+		echo <<<EOT
    <input type="hidden" name="_remove" id="_remove" value="" />
    <input type="hidden" name="_initialize" id="_initialize" value="" />
    </form>

@@ -4,7 +4,7 @@
  Plugin URI: http://www.andurban.de/wordpress-stuff/plugins/faviroll
  Description: Caches all favicon.ico in PNG format and use this in your blogroll.
  Author: andurban.de
- Version:  0.5.1.1
+ Version:  0.5.1.2
  Author URI:  http://www.andurban.de/
  Plugin URI:  http://www.andurban.de/tag/faviroll
  ----------------------------------------------------------------------------------------
@@ -46,7 +46,7 @@ if ($_SERVER['HTTP_HOST'] == 'localhost') error_reporting(E_ALL);  // |E_STRICT
 	
 			if (file_exists($myFile)) {
 				wp_register_style('faviroll-be', $myUrl);
-				wp_enqueue_style('faviroll-be');
+				wp_enqueue_style('faviroll-be',false, array('admin-bar-css'));
 			}
 	
 			// @see http://codex.wordpress.org/Function_Reference/wp_enqueue_script
@@ -131,6 +131,52 @@ if (is_admin()) {
 	add_action('edit_link', 'faviroll_single_favicon');
 	add_action('add_link' , 'faviroll_single_favicon');
 
+
+	/**
+	 * Insert the favicon column before column:Namen in Link-Admin Menu
+	 */
+	function faviroll_edit_link_columns($columns){
+
+		$result = array();
+
+		foreach ($columns as $key => $value) {
+			switch($key) {
+				case 'name':
+					$result['faviroll'] = '';
+				default:
+					$result[$key] = $value;
+					break;
+			}
+		}
+		return $result;
+	}
+	add_filter('manage_link-manager_columns', 'faviroll_edit_link_columns');
+
+
+	/**
+	 * 
+	 */
+	function faviroll_manage_link_columns($column_name, $id) {
+		static $fr;
+
+		$bookmark = get_bookmark($id);
+		switch($column_name) {
+		case 'faviroll':
+			require_once('Faviroll.class.php');
+		
+			if (!isset($fr))
+				$fr = new Faviroll();
+
+			echo '<img src="'.$fr->getFaviconByBookmark($bookmark).'" title="" alt="" />';
+			break;
+		default:
+			break;
+		}
+	}
+	add_action('manage_link_custom_column', 'faviroll_manage_link_columns', 10, 2);
+
+	
+	
 	######################
 	#  END Backend Area  #
 	######################

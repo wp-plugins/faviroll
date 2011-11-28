@@ -5,6 +5,14 @@ Version: latest
 */
 
 
+/* Manage Links Backend Panel */
+.column-faviroll {
+ width:16px;
+}
+
+
+/* Faviroll Backend Panel */
+
 .visible {visibility:visible; padding-left:10px;}
 .hidden  {visibility:hidden;}
 
