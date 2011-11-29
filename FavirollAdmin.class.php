@@ -118,8 +118,6 @@ class FavirollAdmin extends Faviroll {
 		return true;
 	}
 
-
-
 	#################
 	#               #
 	#    GETTER     #
@@ -134,28 +132,28 @@ class FavirollAdmin extends Faviroll {
 	}
 
 	/**
-	 * @see
+	 * @see FavirollWorker#getPluginDir()
 	 */
 	function getPluginDir() {
 		return $this->worker->getPluginDir();
 	}
 
 	/**
-	 * @see
+	 * @see FavirollWorker#getFactoryBasename()
 	 */
 	function getFactoryBasename() {
 		return $this->worker->getFactoryBasename();
 	}
 
 	/**
-	 * @see
+	 * @see FavirollWorker#getMD5()
 	 */
 	function getMD5($url) {
 		return $this->worker->getMD5($url);
 	}
 
 	/**
-	 * @see
+	 * @see FavirollWorker#getHomeURL()
 	 */
 	function getHomeURL() {
 		return $this->worker->getHomeURL();
@@ -236,7 +234,7 @@ Use your ftp client, or the following command to fix it:<br />
 
 		$result.= '<!-- Faviroll Helper Environment--> <input type="hidden" id="wpmu_prefix" value="'.$this->getWPMUPrefix().'" />
  <div style="text-align:center;">
-  <table class="favi-roll-table"><tbody>
+  <table class="faviroll-table"><tbody>
   <tr>
    <td class="icon"><input type="button" title="remove plugin settings from database and drop all favicon cache files" value="remove settings and icon cache" onclick="return favi.roll.removeSettingsAndCache();" /></td><td></td><td class="notice" title="Click refresh icon to update favicons from their websites"></td>
   </tr>
@@ -344,7 +342,7 @@ Use your ftp client, or the following command to fix it:<br />
 		$title = __('FAVIcons for blogROLL', 'faviroll');
 
 		echo <<<EOT
-  <div id="_countdown" class="updated fade hidden">0 icons left</div>
+  <div id="_faviroll_countdown" class="updated fade faviroll-hidden">0 icons left</div>
   <div class="wrap">
    <div id="icon-options-general" class="icon32"><br /></div>
     <h2>${title}</h2>${message}    
@@ -360,7 +358,7 @@ EOT;
 			echo <<<EOT
     <div style="text-align:center;padding-top:120px;">
      <h2>Welcome to FAVIROLL</h2>
-		 <input id="initbutton" type="submit" title="" value="Click here to start" onclick="return favi.roll.initCache();" />
+		 <input id="_faviroll_initbutton" type="submit" title="" value="Click here to start" onclick="return favi.roll.initCache();" />
     </div>
 EOT;
 

@@ -1,31 +1,24 @@
 /*
-Faviroll backend CSS file
-Author: andurban.de
-Version: latest
-*/
-
+ * Faviroll backend CSS file
+ * Author: andurban.de
+ * Version: latest
+ */
 
 /* Manage Links Backend Panel */
 .column-faviroll {
  width:16px;
 }
 
-
 /* Faviroll Backend Panel */
-
-.visible {visibility:visible; padding-left:10px;}
-.hidden  {visibility:hidden;}
-
-.pad {
-	padding:5px 15px 5px 15px;
-}
+.faviroll-visible {visibility:visible; padding-left:10px;}
+.faviroll-hidden  {visibility:hidden;}
 
 /* FaviRoll Option Page Bookmark Table */
-.favi-roll-table {
+.faviroll-table {
   margin: 5px 0px 5px 5px;
 }
 
-.favi-roll-table th {
+.faviroll-table th {
  padding: 6px;
  text-align:left;
  font-weight:bold;
@@ -35,43 +28,43 @@ Version: latest
  nowrap:nowrap;
 }
 
-.favi-roll-table th#_reload {
+.faviroll-table th#_reload {
  padding-left:28px;
  cursor:pointer;
  background:url(../img/reload.png) 6px center no-repeat;
 }
-.favi-roll-table th#_reload:hover {
+.faviroll-table th#_reload:hover {
  background:url(../img/reload-hover.png) 6px center no-repeat;
 }
 
-.favi-roll-table td.actions {
+.faviroll-table td.actions {
  padding:0px;
  width:480px;
 }
-.favi-roll-table td.notice {
+.faviroll-table td.notice {
  line-height:30px;
  height:52px;
  background:url(../img/green-arrow.png) 8px bottom no-repeat;
 }
 
-.favi-roll-table td img.icon {
+.faviroll-table td img.icon {
  margin:-4px 8px;
 }
 
-.favi-roll-table td.setcolumn {
+.faviroll-table td.setcolumn {
  cursor:pointer;
  width:70px;
 }
 
-.favi-roll-table tr:nth-child(even) {
+.faviroll-table tr:nth-child(even) {
  background: #d8e4e5;
 }
-.favi-roll-table td.link {
+.faviroll-table td.link {
  text-align:left;
  padding-left:6px;
 }
 
-.favi-roll-table td.link strong {
+.faviroll-table td.link strong {
  display:block;
  line-height:22px;
  height:22px;
@@ -79,17 +72,17 @@ Version: latest
  background:0px center no-repeat;
 }
 
-.favi-roll-table td input.radio {
+.faviroll-table td input.radio {
  margin:0px auto;
 }
 
-.favi-roll-table td input.button {
+.faviroll-table td input.button {
  padding:1px 5px 1px 5px;
  margin:4px 4px 4px 4px;
  border:none;
 }
 
-.favi-roll-table td.icon{
+.faviroll-table td.icon {
  background:url(../img/dumpster.png)  14px center no-repeat;
  font-weight:bold;
  height:70px;
@@ -99,14 +92,16 @@ Version: latest
  padding-left:70px;
 }
 
-#initbutton {
+#_faviroll_initbutton {
  font-size:2em;
  padding:10px;
 }
 
-#_countdown {
+#_faviroll_countdown {
  margin-left:260px;
  display:inline;
  padding:15px;
  font-size:2.8em;
 }
+
+/*eof*/

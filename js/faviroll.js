@@ -349,11 +349,11 @@ Faviroll.prototype = {
 
 
 	/**
-	 * 
+	 * Initialize the Countdown Tooltip
 	 */
 	initCountdown : function(_counter) {
 
-		var div = document.getElementById('_countdown');
+		var div = document.getElementById('_faviroll_countdown');
 		if (!div)
 			return false;
 
@@ -367,7 +367,7 @@ Faviroll.prototype = {
 	 */
 	setCountdown : function (_number) {
 		
-		var div = document.getElementById('_countdown');
+		var div = document.getElementById('_faviroll_countdown');
 		if (!div)
 			return false;
 

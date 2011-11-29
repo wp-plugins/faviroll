@@ -4,8 +4,6 @@ Author: andurban.de
 Version: latest
 */
 
-
-
 /* Disable list-style in Important if you use "WP Render Blogroll Links"
  * @see http://wordpress.org/extend/plugins/wp-render-blogroll-links/
  */
@@ -19,5 +17,4 @@ li.faviroll a.faviroll {
 }
 
 /* You may here anhanced style the blogroll-links */
-.faviroll {
-}
+.faviroll {}
