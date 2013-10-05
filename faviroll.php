@@ -2,7 +2,7 @@
 /*
  Plugin Name: FAVIROLL - FAVIcons for blogROLL
  Plugin URI: http://www.andurban.de/wordpress-stuff/plugins/faviroll
- Description: Convert the Favicons from all bookmark sites in PNG an keep it in local cache. The blogroll use the local cached icons. 
+ Description: Caches all favicon.ico in PNG format and use this in your blogroll.
  Author: andurban.de
  Version:  0.5.1.3
  Author URI:  http://www.andurban.de/
