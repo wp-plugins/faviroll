@@ -3,8 +3,8 @@ Contributors: UnderWordPressure
 Donate link: http://donate.andurban.de/
 Tags: favicons, links, icons, blogroll, bookmarks
 Requires at least: 3.x
-Tested up to: 3.3
-Stable tag: 0.5.1.3
+Tested up to: 3.8
+Stable tag: 0.5.1.4
 
 == Description ==
 
@@ -34,6 +34,9 @@ Explanation:
 * OPT = Optimization
 * CLN = Cleanup/Refactoring
 * OTH = Other
+
+= 0.5.1.4 =
+* OTH: Maintenance Compatibility Check for WordPress 3.8. Faviroll still works fine ;-)
 
 = 0.5.1.3 - Codename: Mystique conflict =
 * FIX: Naming conflict of some stylesheet definitions. Now all styles take the "faviroll" prefix. Thanks Alexandre.
