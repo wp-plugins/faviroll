@@ -48,7 +48,7 @@ Faviroll.prototype = {
 			_env.plugin_url = tmp.join('/') + '/';
 		};
 
-		favi.env.load_icon_url = favi.env.plugin_url + 'img/wpspin_light.gif';
+		favi.env.load_icon_url = favi.env.plugin_url + 'img/spinner.gif';
 		
 		return true;
 	},
@@ -286,7 +286,7 @@ Faviroll.prototype = {
 		if (!(link && link.style && link.icon_url))
 			return false;
 
-		if (link.icon_url.indexOf('/img/wpspin_light.gif') > -1)
+		if (link.icon_url.indexOf('/img/spinner.gif') > -1)
 			link.style.backgroundImage = 'url(' + faviconURL + ')';
 
 		this.setCountdown(-1);
@@ -658,7 +658,7 @@ Faviroll.prototype = {
 		
 		var currentImg = img.src;
 
-		if (currentImg.indexOf('/img/wpspin_light.gif') > -1)
+		if (currentImg.indexOf('/img/spinner.gif') > -1)
 			return false;
 
 		// -- Source Image }

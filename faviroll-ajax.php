@@ -61,7 +61,7 @@ function updateLinkImage($link_id,$newicon) {
 	if (!$_POST)
 		exit(0);
 
-	import_request_variables('P','req_');
+	extract($_POST, EXTR_PREFIX_ALL, 'req');
 
 	if (!isset($req_wpmu_prefix))
 		exit(0);

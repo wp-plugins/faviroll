@@ -247,7 +247,7 @@ Use your ftp client, or the following command to fix it:<br />
 		$default = $bookmarks[0];
 
 		$emptyIcon = $this->getImgURL('empty.png');
-		$loadIcon	= $this->getImgURL('wpspin_light.gif');
+		$loadIcon	= $this->getImgURL('spinner.gif');
 
 		$cacheIcons = $this->getCacheIcons();
 		$cacheurl = $this->getCacheURL();

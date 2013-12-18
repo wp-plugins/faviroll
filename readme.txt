@@ -4,7 +4,7 @@ Donate link: http://donate.andurban.de/
 Tags: favicons, links, icons, blogroll, bookmarks
 Requires at least: 3.x
 Tested up to: 3.8
-Stable tag: 0.5.1.4
+Stable tag: 0.5.2
 
 == Description ==
 
@@ -34,6 +34,9 @@ Explanation:
 * OPT = Optimization
 * CLN = Cleanup/Refactoring
 * OTH = Other
+
+= 0.5.2 =
+* OPT: Favion detection optimized. Deprecated PHP Code updated. THX for reporting the issues to faina09.
 
 = 0.5.1.4 =
 * OTH: Maintenance Compatibility Check for WordPress 3.8. Faviroll still works fine ;-)

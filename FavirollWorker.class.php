@@ -64,7 +64,7 @@ class FavirollWorker {
 		
 		$port = ($_SERVER['SERVER_PORT'] == 80) ? '' : (':'.$_SERVER['SERVER_PORT']);
 
-    $url = $proto.'://'.$_SERVER['SERVER_NAME'].$port.$_SERVER['REQUEST_URI'];
+		$url = $proto.'://'.$_SERVER['SERVER_NAME'].$port.$_SERVER['REQUEST_URI'];
 		$elems = explode('wp-admin',$url);
 		$this->homeurl = array_shift($elems);
 
@@ -73,7 +73,7 @@ class FavirollWorker {
 	
 	
 	#################
-  #               #
+    #               #
 	#    GETTER     #
 	#               #
 	#################
@@ -334,9 +334,6 @@ class FavirollWorker {
 		// minimal requirements are okay,
 		// now it's worth to going foreward
 
-		// Get website html code
-		$html = $snoopy->results;
-
 		// get segments from main-url
 		$url_elems = parse_url($i_url);
 		extract($url_elems,EXTR_PREFIX_ALL|EXTR_OVERWRITE|EXTR_REFS,'url');
@@ -345,10 +342,25 @@ class FavirollWorker {
 		$faviconURL = "${url_scheme}://${url_host}/favicon.ico";
 		$typeOfURL = "hard coded to: $faviconURL";
 
-		// scan html code for things like: <link rel="shortcut icon" href="...." />
-		if (preg_match('/<link[^>]+rel=["\'](?:shortcut )?icon["\'][^>]+?href=["\']([^"\']+?)["\']/si', $html, $matches)) {
+		// use DOMParser to detect the shortcut icon from: <link rel="shortcut icon" href="...." />
+		@$dom = new DOMDocument();
+		if ($dom) {
+			// Get website html code
+			$htmlCode = $snoopy->results;
+			
+			@$dom->loadHTML($htmlCode);
 
-			$codeURL = html_entity_decode($matches[1]);
+			$linknodes = $dom->getElementsByTagName('link');
+			foreach ($linknodes as $node) {
+			  if (preg_match('/icon/i', $node->getAttribute('rel'))) {
+			  	$codeURL = $node->getAttribute('href');
+			  	break;
+				}
+			}
+		}
+
+		if (isset($codeURL)) {
+			
 			$link = parse_url($codeURL);
 			extract($link,EXTR_PREFIX_ALL|EXTR_OVERWRITE|EXTR_REFS,'lk');
 
@@ -372,7 +384,9 @@ class FavirollWorker {
 					$typeOfURL = 'relative PATH on server';
 				}
 			}
+		
 		}
+
 
 		if($this->validateURL($faviconURL))
 			return $faviconURL;
