@@ -45,7 +45,7 @@ function set_option($key, $value) {
  */
 function updateLinkImage($link_id,$newicon) {
 	global $wpdb;
-	$result = "basename:";
+	$result = 'basename:';
 
 	$sqlcmd = "UPDATE $wpdb->links SET link_image = %s WHERE link_id = %s";
 	$replaced = $wpdb->query( $wpdb->prepare($sqlcmd, $newicon, $link_id));

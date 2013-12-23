@@ -4,7 +4,7 @@
  Plugin URI: http://www.andurban.de/wordpress-stuff/plugins/faviroll
  Description: Caches all favicon.ico in PNG format and use this in your blogroll.
  Author: andurban.de
- Version:  0.5.2
+ Version:  0.5.2.1
  Author URI:  http://www.andurban.de/
  Plugin URI:  http://www.andurban.de/tag/faviroll
  ----------------------------------------------------------------------------------------

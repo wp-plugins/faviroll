@@ -4,7 +4,7 @@ Donate link: http://donate.andurban.de/
 Tags: favicons, links, icons, blogroll, bookmarks
 Requires at least: 3.x
 Tested up to: 3.8
-Stable tag: 0.5.2
+Stable tag: 0.5.2.1
 
 == Description ==
 
@@ -19,6 +19,7 @@ The plugin fallback to a default icon, if on the remote websites cannot be detec
 2. where you find the control panel in the backend
 3. faviroll backend panel with favicon cache
 4. manage-links panel have favicons decoration also
+5. caution messages if something is wrong 
 
 == Installation ==
 1. install & activate the plugin.
@@ -34,6 +35,10 @@ Explanation:
 * OPT = Optimization
 * CLN = Cleanup/Refactoring
 * OTH = Other
+
+= 0.5.2.1 =
+* OPT: Preventive examination whether url_fopen is possible. If not you will got feedback.
+* CLN: Code maintenance.
 
 = 0.5.2 =
 * OPT: Favion detection optimized. Deprecated PHP Code updated. THX for reporting the issues to faina09.

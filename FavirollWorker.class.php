@@ -73,7 +73,7 @@ class FavirollWorker {
 	
 	
 	#################
-    #               #
+  #               #
 	#    GETTER     #
 	#               #
 	#################
@@ -238,7 +238,6 @@ class FavirollWorker {
 			return false;
 
 		$icourl = $this->locateIcon($rooturl);
-			
 		return $this->makeIcon($icourl,$basename);
 	}
 
@@ -360,7 +359,6 @@ class FavirollWorker {
 		}
 
 		if (isset($codeURL)) {
-			
 			$link = parse_url($codeURL);
 			extract($link,EXTR_PREFIX_ALL|EXTR_OVERWRITE|EXTR_REFS,'lk');
 

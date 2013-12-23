@@ -1,7 +1,7 @@
 <?php
 /*
  FavirollAdmin - Class for wordpress plugin "Faviroll" backend
- Author: ANDURBAN.DE
+ Author: andurban.de
  Version: latest
  ----------------------------------------------------------------------------------------
  Copyright 2009-2013 andurban.de  (email: http://www.andurban.de/kontakt)
@@ -29,6 +29,7 @@ class FavirollAdmin extends Faviroll {
 	 */
 	function __construct() {
 		parent::__construct();
+
 		$this->initOptions();
 		$this->initDefaultIcon();
 	}
@@ -42,7 +43,7 @@ class FavirollAdmin extends Faviroll {
 
 	/**
 	 * Init and load options from DB to member: opts.
-	 */
+	 */ 
 	function initOptions() {
 
 		// remove orphaned stuff from previous versions
@@ -164,16 +165,28 @@ class FavirollAdmin extends Faviroll {
 	 * Check write permissions on cache directory.
 	 * @return error message if cache directory is not writable, or the string is given into method
 	 */
-	function getCachePermCheckMsg($passtru_message=null) {
+	function getPermCheckMsg($passtru_message=null) {
 
+		$result = '';
+
+		if (!$this->can_url_fopen())
+			$result.= '<p><strong style="color:#aa0000;background-color:#fff000;padding:0px 5px 0px 5px;">CAUTION:</strong> no permission to open external URLs.<br />
+Faviroll works just properly if you (your webmaster) enable <strong>"allow_url_fopen"</strong> in php.ini.<br />
+For further informations see: http://www.php.net/manual/en/configuration.changes.php
+</p>';
+
+		
 		if (!$this->can_write_cache())
-		return '<b>CAUTION</b>, no file permission to create icon-cache.
-<p>You have to change the permissions.<br />
+			$result.= '<p><strong style="color:#aa0000;background-color:#fff000;padding:0px 5px 0px 5px;">CAUTION:</strong> no file permission to create icon-cache.<br />
+You have to change the permissions.<br />
 Use your ftp client, or the following command to fix it:<br />
 <br />
 <code># chmod 0775 '.$this->getCacheDir().'</code></p>';
 
-		return $passtru_message;
+		if (empty($result))
+			return $passtru_message;
+	
+		return $result; 
 	}
 
 
@@ -211,6 +224,33 @@ Use your ftp client, or the following command to fix it:<br />
 	}
 
 
+	/**
+	 * Check url_fopen is possible, try to enable if not
+	 * @return TRUE if url_fopen is possible
+ 	 */
+	function can_url_fopen() {
+	
+		$inikey = 'allow_url_fopen';
+	
+		// Is usr_fopen allowed?
+		$isOk = ini_get($inikey);
+		if ($isOk)
+			return $isOk;
+	
+		// Is it possible to enable url_fopen?
+		$opts = ini_get_all();
+		if (isset($opt[$inikey]) && isset($opt[$inikey]['access']))
+			$isOk = ($opt[$inikey]['access'] & INI_USER);
+	
+		// set url_fopen
+		if ($isOk)
+			$isOk = ini_set($inikey,'1');
+	
+		return $isOk;
+		
+	}
+	
+	
 	/**
 	 * @return the factory default favicon URL
 	 */
@@ -334,7 +374,7 @@ Use your ftp client, or the following command to fix it:<br />
 			}
 		}
 
-		$message = $this->getCachePermCheckMsg($message);
+		$message = $this->getPermCheckMsg($message);
 		if (!is_null($message))
 		$message = "<div class='updated fade below-h2' id='message'><p>$message</p></div>";
 			
