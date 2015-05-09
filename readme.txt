@@ -3,8 +3,8 @@ Contributors: UnderWordPressure
 Donate link: http://donate.andurban.de/
 Tags: favicons, links, icons, blogroll, bookmarks
 Requires at least: 3.x
-Tested up to: 3.8
-Stable tag: 0.5.2.1
+Tested up to: 4.2
+Stable tag: 0.6
 
 == Description ==
 
@@ -35,6 +35,9 @@ Explanation:
 * OPT = Optimization
 * CLN = Cleanup/Refactoring
 * OTH = Other
+
+= 0.6 =
+* CLN: Code maintenance for WP 4.2
 
 = 0.5.2.1 =
 * OPT: Preventive examination whether url_fopen is possible. If not you will got feedback.
